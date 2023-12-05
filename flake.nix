@@ -23,7 +23,7 @@
           };
           boot = {
             loader.timeout = lib.mkForce 0;
-            initrd.systemd.enable = lib.mkForce false;
+            initrd.systemd.enable = lib.mkForce false; # systemd init in iso is broken, see https://github.com/NixOS/nixpkgs/issues/217173
           };
         })
         ./configuration.nix
