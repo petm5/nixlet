@@ -1,0 +1,18 @@
+{
+  description = "A minimal server image";
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.05";
+  };
+  outputs = { self, nixpkgs }: rec {
+    nixosConfigurations.srv = {
+      system = "x86_64-linux";
+
+      modules = [
+        "${nixpkgs}/nixos/modules/installer/cd-dvd/iso-image.nix"
+        ./iso.nix
+      ];
+
+      default = self.nixosConfigurations.srv;
+    };
+  };
+}
