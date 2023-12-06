@@ -32,6 +32,8 @@ in
         systemd.enable = lib.mkForce false; # Broken for now, see https://github.com/NixOS/nixpkgs/projects/51 and https://github.com/NixOS/nixpkgs/issues/217173
       };
 
+      supportedFilesystems = [ "btrfs" ];
+
       loader.grub.enable = false;
 
       kernelParams = [

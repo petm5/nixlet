@@ -24,9 +24,12 @@ in
         ExecStart = [
           " "
           ''
-            ${config.boot.initrd.systemd.package}/bin/systemd-repart \
+            ${config.systemd.package}/bin/systemd-repart \
               --dry-run no ${lib.optionalString (cfg.device != null) cfg.device}
           ''
+        ];
+        Environment = [
+          "PATH=${pkgs.btrfs-progs}/bin" # HACK: Help systemd-repart to find btrfs-progs
         ];
         wantedBy = [ "local-fs-pre.target" ];
         before = [ "local-fs-pre.target" ];
