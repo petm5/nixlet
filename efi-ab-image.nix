@@ -20,64 +20,58 @@ in
   imports = [ (modulesPath + "/image/repart.nix") ];
 
   config = {
-    fileSystems = {
-      "/" = mkImageMediaOverride
-        {
-          fsType = "tmpfs";
-          options = [ "mode=0755" ];
-        };
-
-      # Note that /dev/root is a symlink to the actual root device
-      # specified on the kernel command line, created in the stage 1
-      # init script.
-      "/iso" = mkImageMediaOverride
-        { device = "/dev/root";
-          neededForBoot = true;
-          noCheck = true;
-        };
-
-      # In stage 1, mount a tmpfs on top of /nix/store (the squashfs
-      # image) to make this a live CD.
-      "/nix/.ro-store" = mkImageMediaOverride
-        { fsType = "squashfs";
-          device = "/iso/nix-store.squashfs";
-          options = [ "loop" ];
-          neededForBoot = true;
-        };
-
-      "/nix/.rw-store" = mkImageMediaOverride
-        { fsType = "tmpfs";
-          options = [ "mode=0755" ];
-          neededForBoot = true;
-        };
-
-      "/nix/store" = mkImageMediaOverride
-        { fsType = "overlay";
-          device = "overlay";
-          options = [
-            "lowerdir=/nix/.ro-store"
-            "upperdir=/nix/.rw-store/store"
-            "workdir=/nix/.rw-store/work"
-          ];
-          depends = [
-            "/nix/.ro-store"
-            "/nix/.rw-store/store"
-            "/nix/.rw-store/work"
-          ];
-        };
-    };
-
-    environment.systemPackages =  [ pkgs.grub2 pkgs.grub2_efi ];
 
     boot = {
       initrd = {
         availableKernelModules = [ "squashfs" "vfat" "overlay" ];
         supportedFilesystems = [ "vfat" ];    
         kernelModules = [ "loop" "overlay" ];
-        systemd.enable = true;
+        systemd.enable = lib.mkForce false; # Broken for now, see https://github.com/NixOS/nixpkgs/projects/51 and https://github.com/NixOS/nixpkgs/issues/217173
       };
 
       loader.grub.enable = false;
+
+      kernelParams = [
+        "root=/dev/disk/by-partlabel/root-current"
+        "console=ttyS0"
+      ];
+    };
+
+    # Manually set up overlays since systemd-volatile-root is broken
+    # Mostly copied from the iso builder, can probably be simplified a bit
+    fileSystems = {
+      "/" = {
+        fsType = "tmpfs";
+        options = [ "mode=0755" ];
+        neededForBoot = true;
+      };
+      
+      "/nix/.ro-store" = {
+        device = "/dev/root";
+        fsType = "squashfs";
+        neededForBoot = true;
+      };
+
+      "/nix/.rw-store" = {
+        fsType = "tmpfs";
+        options = [ "mode=0755" ];
+        neededForBoot = true;
+      };
+
+      "/nix/store" = {
+        fsType = "overlay";
+        device = "overlay";
+        options = [
+          "lowerdir=/nix/.ro-store/nix/store"
+          "upperdir=/nix/.rw-store/store"
+          "workdir=/nix/.rw-store/work"
+        ];
+        depends = [
+          "/nix/.ro-store"
+          "/nix/.rw-store/store"
+          "/nix/.rw-store/work"
+        ];
+      };
     };
 
     image.repart = {
@@ -112,7 +106,7 @@ in
           repartConfig = {
             Type = "root";
             Format = "squashfs";
-            Label = "roota";
+            Label = "root-current";
             Minimize = "guess";
           };
         };
