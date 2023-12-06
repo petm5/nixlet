@@ -8,9 +8,17 @@ with lib;
 
 let
 
-  bootLoaderConfigPath = "/loader/entries/nixos.conf";
   kernelPath = "/EFI/nixos/kernel.efi";
   initrdPath = "/EFI/nixos/initrd.efi";
+
+  partlabelPath = "/dev/disk/by-partlabel";
+
+  # TODO: Make this configurable externally
+  partitionLabel = {
+    current = "nixos-current";
+    next = "nixos-next";
+    home = "data";
+  };
 
   efiArch = pkgs.stdenv.hostPlatform.efiArch;
 
@@ -26,8 +34,7 @@ in
 
     boot = {
       initrd = {
-        availableKernelModules = [ "squashfs" "vfat" "overlay" ];
-        supportedFilesystems = [ "vfat" ];    
+        availableKernelModules = [ "squashfs" "overlay" ];
         kernelModules = [ "loop" "overlay" ];
         systemd.enable = lib.mkForce false; # Broken for now, see https://github.com/NixOS/nixpkgs/projects/51 and https://github.com/NixOS/nixpkgs/issues/217173
       };
@@ -37,7 +44,6 @@ in
       loader.grub.enable = false;
 
       kernelParams = [
-        "root=/dev/disk/by-partlabel/root-current"
         "console=ttyS0"
       ];
     };
@@ -82,23 +88,32 @@ in
 
       "/home" = {
         fsType = "btrfs";
-        device = "/dev/disk/by-partlabel/data";
+        device = "${partlabelPath}/${partitionLabel.home}";
       };
     };
 
     image.repart = {
+
       name = "nixos";
+
       partitions = {
         "esp" = {
           contents = {
             "/EFI/BOOT/BOOT${lib.toUpper efiArch}.EFI".source =
               "${pkgs.systemd}/lib/systemd/boot/efi/systemd-boot${efiArch}.efi";
 
-            "${bootLoaderConfigPath}".source = pkgs.writeText "nixos.conf" ''
-              title NixOS
+            "/loader/entries/current.conf".source = pkgs.writeText "nixos.conf" ''
+              title NixOS Current
               linux ${kernelPath}
               initrd ${initrdPath}
-              options init=${config.system.build.toplevel}/init ${toString config.boot.kernelParams}
+              options init=${config.system.build.toplevel}/init root=${partlabelPath}/${toString partitionLabel.current} ${toString config.boot.kernelParams}
+            '';
+
+            "/loader/entries/next.conf".source = pkgs.writeText "nixos.conf" ''
+              title NixOS Next
+              linux ${kernelPath}.next
+              initrd ${initrdPath}.next
+              options init=${config.system.build.toplevel}/init root=${partlabelPath}/${toString partitionLabel.next} ${toString config.boot.kernelParams}
             '';
 
             "${kernelPath}".source =
@@ -113,6 +128,7 @@ in
               SizeMinBytes = "96M";
             };
         };
+
         "root" = {
           storePaths = [ config.system.build.toplevel ];
           repartConfig = {
@@ -127,30 +143,36 @@ in
 
     system.build.diskImage = image;
 
+    # Expand the image on first boot
     systemd.repart = {
       enable = true;
-      device = "/dev/disk/by-partlabel/root-current";
+      device = "${partlabelPath}/${partitionLabel.current}";
+
       partitions = {
+        # The existing root partition
         "10-root-a" = {
           Type = "root";
-          Label = "root-current";
+          Label = "${partitionLabel.current}";
           SizeMinBytes = "512M";
           SizeMaxBytes = "512M";
         };
+
+        # Create a secondary root partition
         "20-root-b" = {
           Type = "root";
-          Label = "root-next";
+          Label = "${partitionLabel.next}";
           SizeMinBytes = "512M";
           SizeMaxBytes = "512M";
         };
+
+        # Create a partition for persistent data
         "30-home" = {
           Type = "home";
-          Label = "data";
+          Label = "${partitionLabel.home}";
           Format = "btrfs";
         };
       };
     };
-    
   };
 
 }
