@@ -37,6 +37,8 @@ in
       ];
     };
 
+    systemd.services."serial-getty@ttyS0".enable = true;
+
     # Manually set up overlays since systemd-volatile-root is broken
     # Mostly copied from the iso builder, can probably be simplified a bit
     fileSystems = {
@@ -114,6 +116,44 @@ in
     };
 
     system.build.diskImage = image;
+
+    systemd.services.systemd-repart = 
+      let
+        repartDevice = "/dev/disk/by-partlabel/root-current";
+      in
+      {
+      serviceConfig = {
+        ExecStart = [
+          " "
+          ''
+            ${config.boot.initrd.systemd.package}/bin/systemd-repart \
+              --dry-run no ${repartDevice}
+          ''
+        ];
+      };
+    };
+
+    systemd.repart = {
+      enable = true;
+      partitions = {
+        "10-root-a" = {
+          Type = "root";
+          Label = "root-current";
+          SizeMinBytes = "512M";
+          SizeMaxBytes = "512M";
+        };
+        "20-root-b" = {
+          Type = "root";
+          Label = "root-next";
+          SizeMinBytes = "512M";
+          SizeMaxBytes = "512M";
+        };
+        "30-home" = {
+          Type = "home";
+          SizeMaxBytes = "128G";
+        };
+      };
+    };
     
   };
 
