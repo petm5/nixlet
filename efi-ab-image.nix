@@ -67,16 +67,18 @@ in
         };
     };
 
-    # Don't build the GRUB menu builder script, since we don't need it
-    # here and it causes a cyclic dependency.
-    boot.loader.grub.enable = false;
-
     environment.systemPackages =  [ pkgs.grub2 pkgs.grub2_efi ];
 
-    boot.initrd.availableKernelModules = [ "squashfs" "vfat" "overlay" ];
+    boot = {
+      initrd = {
+        availableKernelModules = [ "squashfs" "vfat" "overlay" ];
+        supportedFilesystems = [ "vfat" ];    
+        kernelModules = [ "loop" "overlay" ];
+        systemd.enable = true;
+      };
 
-    boot.initrd.supportedFilesystems = [ "vfat" ];    
-    boot.initrd.kernelModules = [ "loop" "overlay" ];
+      loader.grub.enable = false;
+    };
 
     image.repart = {
       name = "nixos";
