@@ -36,6 +36,7 @@ in
       initrd = {
         availableKernelModules = [ "squashfs" "overlay" ];
         kernelModules = [ "loop" "overlay" ];
+
         systemd.enable = lib.mkForce false; # Broken for now, see https://github.com/NixOS/nixpkgs/projects/51 and https://github.com/NixOS/nixpkgs/issues/217173
       };
 
@@ -93,7 +94,6 @@ in
     };
 
     image.repart = {
-
       name = "nixos";
 
       partitions = {
@@ -134,7 +134,7 @@ in
           repartConfig = {
             Type = "root";
             Format = "squashfs";
-            Label = "root-current";
+            Label = "${partitionLabel.current}";
             Minimize = "guess";
           };
         };
