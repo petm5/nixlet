@@ -17,7 +17,10 @@ let
 in
 
 {
-  imports = [ (modulesPath + "/image/repart.nix") ];
+  imports = [
+    (modulesPath + "/image/repart.nix")
+    ./custom-repart-stage2.nix
+  ];
 
   config = {
 
@@ -74,6 +77,11 @@ in
           "/nix/.rw-store/work"
         ];
       };
+
+      "/home" = {
+        fsType = "btrfs";
+        device = "/dev/disk/by-partlabel/data";
+      };
     };
 
     image.repart = {
@@ -117,24 +125,9 @@ in
 
     system.build.diskImage = image;
 
-    systemd.services.systemd-repart = 
-      let
-        repartDevice = "/dev/disk/by-partlabel/root-current";
-      in
-      {
-      serviceConfig = {
-        ExecStart = [
-          " "
-          ''
-            ${config.boot.initrd.systemd.package}/bin/systemd-repart \
-              --dry-run no ${repartDevice}
-          ''
-        ];
-      };
-    };
-
     systemd.repart = {
       enable = true;
+      device = "/dev/disk/by-partlabel/root-current";
       partitions = {
         "10-root-a" = {
           Type = "root";
@@ -150,7 +143,8 @@ in
         };
         "30-home" = {
           Type = "home";
-          SizeMaxBytes = "128G";
+          Label = "data";
+          Format = "btrfs";
         };
       };
     };
