@@ -23,7 +23,8 @@
       ];
     };
     images.iso = self.nixosConfigurations.iso.config.system.build.isoImage;
-    images.efi-ab = self.nixosConfigurations.img.config.system.build.image;
+    images.efi-ab = self.nixosConfigurations.img.config.system.build.diskImage;
+    images.squashfs = self.nixosConfigurations.img.config.system.build.squashfsStore;
     packages.x86_64-linux.default = self.images.iso;
   };
 }

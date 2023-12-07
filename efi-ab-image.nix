@@ -30,6 +30,17 @@ in
     ./custom-repart-stage2.nix
   ];
 
+  options = {
+    diskImage.squashfsCompression = mkOption {
+      default = "zstd -Xcompression-level 6";
+      type = lib.types.str;
+      description = lib.mdDoc ''
+        Compression settings to use for the squashfs nix store.
+      '';
+      example = "zstd -Xcompression-level 6";
+    };
+  };
+
   config = {
 
     boot = {
@@ -76,7 +87,7 @@ in
         fsType = "overlay";
         device = "overlay";
         options = [
-          "lowerdir=/nix/.ro-store/nix/store"
+          "lowerdir=/nix/.ro-store"
           "upperdir=/nix/.rw-store/store"
           "workdir=/nix/.rw-store/work"
         ];
@@ -91,6 +102,11 @@ in
         fsType = "btrfs";
         device = "${partlabelPath}/${partitionLabel.home}";
       };
+    };
+
+    system.build.squashfsStore = pkgs.callPackage (modulesPath + "/../lib/make-squashfs.nix") {
+      storeContents = config.system.build.toplevel;
+      comp = config.diskImage.squashfsCompression;
     };
 
     image.repart = {
@@ -130,18 +146,19 @@ in
         };
 
         "root" = {
-          storePaths = [ config.system.build.toplevel ];
+          #storePaths = [ config.system.build.toplevel ];
           repartConfig = {
             Type = "root";
-            Format = "squashfs";
+            #Format = "squashfs";
             Label = "${partitionLabel.current}";
-            Minimize = "guess";
+            #Minimize = "guess";
+            CopyBlocks = "${config.system.build.squashfsStore}";
           };
         };
       };
     };
 
-    system.build.diskImage = image;
+    system.build.diskImage = config.system.build.image;
 
     # Expand the image on first boot
     systemd.repart = {
@@ -173,6 +190,13 @@ in
         };
       };
     };
-  };
 
+    #systemd.sysupdate = {
+    #  enable = true;
+    #  reboot.enable = true;
+    #  transfers = {
+    #    ""
+    #  };
+    #};
+  };
 }
