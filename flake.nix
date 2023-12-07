@@ -1,5 +1,5 @@
 {
-  description = "A minimal server image";
+  description = "Build OTA-updatable disk images for servers";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
   };
@@ -7,8 +7,6 @@
     nixosConfigurations.iso = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
-        "${nixpkgs}/nixos/modules/profiles/image-based-appliance.nix"
-        "${nixpkgs}/nixos/modules/profiles/headless.nix"
         ./iso-image.nix
         ./configuration.nix
       ];
@@ -16,8 +14,6 @@
     nixosConfigurations.img = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
-        "${nixpkgs}/nixos/modules/profiles/image-based-appliance.nix"
-        "${nixpkgs}/nixos/modules/profiles/headless.nix"
         ./efi-ab-image.nix
         ./configuration.nix
       ];

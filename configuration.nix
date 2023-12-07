@@ -2,10 +2,19 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running `nixos-help`).
 
-{ config, pkgs, ... }:
+{ config, pkgs, modulesPath, ... }:
 
 {
-  networking.hostName = "vpn"; # Define your hostname.
+
+  osName = "nixos";
+  release = "1"; # Bump this on release
+
+  imports = [
+    (modulesPath + "/profiles/image-based-appliance.nix")
+    (modulesPath + "/profiles/headless.nix")
+  ];
+
+  networking.hostName = "nixos"; # Define your hostname.
 
   # Set your time zone.
   time.timeZone = "America/Toronto";
