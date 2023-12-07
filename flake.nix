@@ -1,7 +1,7 @@
 {
   description = "Build OTA-updatable disk images for servers";
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
+    nixpkgs.url = "github:nixos/nixpkgs";
   };
   outputs = { self, nixpkgs }: rec {
     nixosConfigurations.iso = nixpkgs.lib.nixosSystem {
