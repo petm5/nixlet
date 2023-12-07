@@ -1,6 +1,4 @@
-# This module creates a bootable EFI disk image containing the given NixOS
-# configuration.  The derivation for the disk image will be placed in
-# config.system.build.diskImage.
+# Generates a GPT disk image containing a compressed rootfs.
 
 { config, lib, pkgs, modulesPath, ... }:
 
@@ -107,6 +105,13 @@ in
     system.build.squashfsStore = pkgs.callPackage (modulesPath + "/../lib/make-squashfs.nix") {
       storeContents = config.system.build.toplevel;
       comp = config.diskImage.squashfsCompression;
+    };
+
+    system.build.uki = pkgs.callPackage ./make-uki.nix {
+      kernelPath = "${config.boot.kernelPackages.kernel}/${config.system.boot.loader.kernelFile}";
+      initrdPath = "${config.system.build.initialRamdisk}/${config.system.boot.loader.initrdFile}";
+      cmdline = "root=${partlabelPath}/${toString partitionLabel.next} ${toString config.boot.kernelParams}";
+      osName = "NixOS";
     };
 
     image.repart = {
