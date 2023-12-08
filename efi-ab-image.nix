@@ -22,7 +22,6 @@ in
   imports = [
     (modulesPath + "/image/repart.nix")
     ./custom-repart-stage2.nix
-    ./release.nix
   ];
 
   options = {
@@ -39,6 +38,25 @@ in
       type = lib.types.str;
       description = lib.mdDoc ''
         Label used for the persistent home partition.
+      '';
+    };
+    osName = lib.mkOption {
+      default = "nixos";
+      type = lib.types.str;
+      description = lib.mdDoc ''
+        Name used as a prefix for kernels and root partitions.
+      '';
+    };
+    release = lib.mkOption {
+      type = lib.types.str;
+      description = lib.mdDoc ''
+        Incremental version number for releases.
+      '';
+    };
+    updateUrl = lib.mkOption {
+      type = lib.types.str;
+      description = lib.mdDoc ''
+        URL used by systemd-sysupdate to fetch OTA updates
       '';
     };
   };
@@ -213,6 +231,13 @@ in
           };
         };
       };
+    };
+
+    system.build.release = pkgs.callPackage ./make-release.nix {
+      version = version;
+      squashfsPath = config.system.build.squashfsStore;
+      ukiPath = config.system.build.uki;
+      imagePath = config.system.build.diskImage;
     };
   };
 }

@@ -11,15 +11,14 @@
       system ? null,
       modules ? []
     }: let
-      formatModule = ./efi-ab-image.nix;
       image = nixosSystem {
         inherit pkgs system lib;
         modules = [
-          formatModule
+          ./efi-ab-image.nix
         ]
         ++ modules;
       };
     in
-      image.config.system.build.diskImage;
+      image.config.system.build.release;
   };
 }
