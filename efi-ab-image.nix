@@ -119,7 +119,7 @@ in
 
       "/boot" = {
         fsType = "vfat";
-        device = "${partlabelPath}/esp"
+        device = "${partlabelPath}/esp";
       };
 
       "/home" = {
