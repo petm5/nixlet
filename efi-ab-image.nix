@@ -237,7 +237,7 @@ in
       version = version;
       squashfsPath = config.system.build.squashfsStore;
       ukiPath = config.system.build.uki;
-      imagePath = config.system.build.diskImage;
+      imagePath = "${config.system.build.diskImage}/image.raw";
     };
   };
 }

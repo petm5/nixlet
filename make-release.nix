@@ -14,5 +14,8 @@ stdenv.mkDerivation {
     ln -s "${squashfsPath}" "$out/${version}.squashfs"
     ln -s "${ukiPath}" "$out/${version}.efi"
     ln -s "${imagePath}" "$out/${version}.img"
+
+    cd $out
+    sha256sum * > SHA256SUMS
   '';
 }
