@@ -1,4 +1,5 @@
 # Help systemd to find our boot device
+# Required for systemd-repart and systemd-sysupdate to work properly
 
 { config, ... }:
 {

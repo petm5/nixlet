@@ -21,7 +21,6 @@ in
 {
   imports = [
     (modulesPath + "/image/repart.nix")
-    ./custom-repart-stage2.nix
     ./link-volatile-root.nix
   ];
 
