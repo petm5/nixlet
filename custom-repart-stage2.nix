@@ -1,3 +1,5 @@
+# Custom systemd-repart service that can handle having a tmpfs as root
+
 {config, lib, pkgs, ...}:
 let
   cfg = config.systemd.repart;
@@ -29,7 +31,7 @@ in
           ''
         ];
         Environment = [
-          "PATH=${pkgs.btrfs-progs}/bin" # HACK: Help systemd-repart to find btrfs-progs
+          "PATH=${pkgs.btrfs-progs}/bin" # Help systemd-repart to find btrfs-progs
         ];
         wantedBy = [ "local-fs-pre.target" ];
         before = [ "local-fs-pre.target" ];

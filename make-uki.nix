@@ -1,3 +1,6 @@
+# Generate a unified kernel image with systemd-stub.
+# These can be signed and verified by Secure Boot.
+
 {pkgs, lib, stdenv
 , systemd
 , osName
