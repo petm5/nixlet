@@ -180,6 +180,7 @@ in
         # Create a secondary root partition
         "20-root-b" = {
           Type = "root";
+          Label = "_empty";
           SizeMinBytes = "512M";
           SizeMaxBytes = "512M";
         };
@@ -205,6 +206,7 @@ in
           };
           Target = {
             Type = "partition";
+            Path = "auto";
             MatchPartitionType = "root";
             MatchPattern = "${config.osName}_@v";
           };
