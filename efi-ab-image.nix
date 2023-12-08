@@ -22,6 +22,7 @@ in
   imports = [
     (modulesPath + "/image/repart.nix")
     ./custom-repart-stage2.nix
+    ./link-volatile-root.nix
   ];
 
   options = {
@@ -90,7 +91,7 @@ in
         neededForBoot = true;
       };
       
-      "/run/systemd/volatile-root" = {
+      "/nix/.ro-store" = {
         device = "/dev/root";
         fsType = "squashfs";
         neededForBoot = true;
@@ -106,12 +107,12 @@ in
         fsType = "overlay";
         device = "overlay";
         options = [
-          "lowerdir=/run/systemd/volatile-root"
+          "lowerdir=/nix/.ro-store"
           "upperdir=/nix/.rw-store/store"
           "workdir=/nix/.rw-store/work"
         ];
         depends = [
-          "/run/systemd/volatile-root"
+          "/nix/.ro-store"
           "/nix/.rw-store/store"
           "/nix/.rw-store/work"
         ];
