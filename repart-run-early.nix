@@ -11,8 +11,8 @@ in
         Environment = [
           "PATH=${pkgs.btrfs-progs}/bin" # Help systemd-repart to find btrfs-progs
         ];
-        wantedBy = [ "local-fs-pre.target" ];
-        after = [ "local-fs-pre.target" ];
+        requiredBy = [ "local-fs-pre.target" ];
+        before = [ "local-fs-pre.target" ];
       };
     };
   };
