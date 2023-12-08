@@ -199,6 +199,9 @@ in
       reboot.enable = true;
       transfers = {
         "10-rootfs" = {
+          Transfer = {
+            Verify = "no";
+          };
           Source = {
             Type = "url-file";
             Path = "${config.updateUrl}";
@@ -213,11 +216,13 @@ in
           };
         };
         "20-uki" = {
+          Transfer = {
+            Verify = "no";
+          };
           Source = {
             Type = "url-file";
             Path = "${config.updateUrl}";
             MatchPattern = "${config.osName}_@v.efi";
-            Verify = "no";
           };
           Target = {
             Type = "regular-file";
