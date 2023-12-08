@@ -22,7 +22,6 @@ in
   imports = [
     (modulesPath + "/image/repart.nix")
     ./repart-run-early.nix
-    ./link-volatile-root.nix
   ];
 
   options = {
