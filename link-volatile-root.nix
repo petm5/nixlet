@@ -8,7 +8,7 @@
     script = ''
       ln -s /dev/root /run/systemd/volatile-root
     '';
-    requiredBy = [ "local-fs.target" ];
+    requiredBy = [ "sysinit.target" ];
     before = [ "local-fs.target" ];
   };
 }
