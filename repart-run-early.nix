@@ -8,13 +8,6 @@ in
   config = {
     systemd.services.systemd-repart = {
       serviceConfig = {
-        ExecStart = [
-          " "
-          ''
-            ${config.systemd.package}/bin/systemd-repart \
-              --dry-run no
-          ''
-        ];
         Environment = [
           "PATH=${pkgs.btrfs-progs}/bin" # Help systemd-repart to find btrfs-progs
         ];

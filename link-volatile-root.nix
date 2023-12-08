@@ -8,7 +8,7 @@
     script = ''
       ln -s /dev/root /run/systemd/volatile-root
     '';
-    unitConfig.DefaultDependencies = false;
+    unitConfig.DefaultDependencies = false; # Prevent dependency cycle
     requiredBy = [ "local-fs.target" ];
     before = [ "local-fs.target" ];
   };
