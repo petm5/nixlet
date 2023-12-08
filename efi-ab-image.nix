@@ -117,6 +117,11 @@ in
         ];
       };
 
+      "/boot" = {
+        fsType = "vfat";
+        device = "${partlabelPath}/esp"
+      };
+
       "/home" = {
         fsType = "btrfs";
         device = "${partlabelPath}/${cfg.homeLabel}";
@@ -149,6 +154,7 @@ in
             repartConfig = {
               Type = "esp";
               Format = "vfat";
+              Label = "esp";
               SizeMinBytes = "96M";
             };
         };
@@ -180,7 +186,7 @@ in
         # Create a secondary root partition
         "20-root-b" = {
           Type = "root";
-          Label = "_empty";
+          Label = "${osName}_0";
           SizeMinBytes = "512M";
           SizeMaxBytes = "512M";
         };
@@ -206,11 +212,9 @@ in
             Type = "url-file";
             Path = "${config.updateUrl}";
             MatchPattern = "${config.osName}_@v.squashfs";
-            Verify = "no";
           };
           Target = {
             Type = "partition";
-            Path = "${partlabelPath}/${version}";
             MatchPartitionType = "root";
             MatchPattern = "${config.osName}_@v";
           };
