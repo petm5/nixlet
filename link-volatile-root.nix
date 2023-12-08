@@ -1,15 +1,13 @@
 # Help systemd to find our boot device
-# cp /dev/root /run/systemd/volatile-root
 
 { config, ... }:
 {
   systemd.services."link-volatile-root" = {
+    description = "Register boot device on volatile root";
     script = ''
       ln -s /dev/root /run/systemd/volatile-root
     '';
-    serviceConfig = {
-      wantedBy = [ "local-fs-pre.target" ];
-      before = [ "local-fs-pre.target" ];
-    };
+    wantedBy = [ "local-fs-pre.target" ];
+    before = [ "local-fs-pre.target" ];
   };
 }
