@@ -173,7 +173,6 @@ in
     # Expand the image on first boot
     systemd.repart = {
       enable = true;
-      device = "${partlabelPath}/${version}";
 
       partitions = {
         # The existing root partition
