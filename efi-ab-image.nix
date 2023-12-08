@@ -90,7 +90,7 @@ in
         neededForBoot = true;
       };
       
-      "/nix/.ro-store" = {
+      "/run/systemd/volatile-root" = {
         device = "/dev/root";
         fsType = "squashfs";
         neededForBoot = true;
@@ -106,12 +106,12 @@ in
         fsType = "overlay";
         device = "overlay";
         options = [
-          "lowerdir=/nix/.ro-store"
+          "lowerdir=/run/systemd/volatile-root"
           "upperdir=/nix/.rw-store/store"
           "workdir=/nix/.rw-store/work"
         ];
         depends = [
-          "/nix/.ro-store"
+          "/run/systemd/volatile-root"
           "/nix/.rw-store/store"
           "/nix/.rw-store/work"
         ];
@@ -186,7 +186,7 @@ in
         # Create a secondary root partition
         "20-root-b" = {
           Type = "root";
-          Label = "${config.osName}_0";
+          Label = "_empty";
           SizeMinBytes = "512M";
           SizeMaxBytes = "512M";
         };
@@ -216,6 +216,7 @@ in
           Target = {
             Type = "partition";
             MatchPartitionType = "root";
+            Path = "auto";
             MatchPattern = "${config.osName}_@v";
           };
         };
