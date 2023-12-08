@@ -15,5 +15,11 @@
         Incremental version number for releases.
       '';
     };
+    updateUrl = lib.mkOption {
+      type = lib.types.str;
+      description = lib.mdDoc ''
+        URL used by systemd-sysupdate to fetch OTA updates
+      '';
+    };
   };
 }

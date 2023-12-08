@@ -8,7 +8,7 @@ let
 
   cfg = config.diskImage;
 
-  version = "${config.osName}-${config.release}";
+  version = "${config.osName}_${config.release}";
 
   kernelPath = "/EFI/Linux/${version}.efi";
 
@@ -175,12 +175,44 @@ in
       };
     };
 
-    #systemd.sysupdate = {
-    #  enable = true;
-    #  reboot.enable = true;
-    #  transfers = {
-    #    ""
-    #  };
-    #};
+    systemd.sysupdate = {
+      enable = true;
+      reboot.enable = true;
+      transfers = {
+        "10-rootfs.conf" = {
+          Source = {
+            Type = "url-file";
+            Path = "${config.updateUrl}";
+            MatchPattern = "${config.osName}_@v.squashfs";
+          };
+          Target = {
+            Type = "partition";
+            MatchPartitionType = "root";
+            MatchPattern = "${config.osName}_@v";
+          };
+        };
+        "20-uki.conf" = {
+          Source = {
+            Type = "url-file";
+            Path = "${config.updateUrl}";
+            MatchPattern = "${config.osName}_@v.efi";
+          };
+          Target = {
+            Type = "regular-file";
+            Path = "/EFI/Linux";
+            PathRelativeTo = "esp";
+            MatchPattern = ''
+              ${config.osName}_@v+@l-@d.efi
+              ${config.osName}_@v+@l.efi
+              ${config.osName}_@v.efi
+            '';
+            Mode = "0444";
+            TriesLeft = 3;
+            TriesDone = 0;
+            InstancesMax = 2;
+          };
+        };
+      };
+    };
   };
 }
