@@ -210,7 +210,7 @@ in
           };
           Target = {
             Type = "partition";
-            Path = "auto";
+            Path = "${partlabelPath}/${version}";
             MatchPartitionType = "root";
             MatchPattern = "${config.osName}_@v";
           };
