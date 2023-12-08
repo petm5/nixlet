@@ -198,11 +198,12 @@ in
       enable = true;
       reboot.enable = true;
       transfers = {
-        "10-rootfs.conf" = {
+        "10-rootfs" = {
           Source = {
             Type = "url-file";
             Path = "${config.updateUrl}";
             MatchPattern = "${config.osName}_@v.squashfs";
+            Verify = "no";
           };
           Target = {
             Type = "partition";
@@ -211,19 +212,20 @@ in
             MatchPattern = "${config.osName}_@v";
           };
         };
-        "20-uki.conf" = {
+        "20-uki" = {
           Source = {
             Type = "url-file";
             Path = "${config.updateUrl}";
             MatchPattern = "${config.osName}_@v.efi";
+            Verify = "no";
           };
           Target = {
             Type = "regular-file";
             Path = "/EFI/Linux";
             PathRelativeTo = "esp";
             MatchPattern = ''
-              ${config.osName}_@v+@l-@d.efi
-              ${config.osName}_@v+@l.efi
+              ${config.osName}_@v+@l-@d.efi \
+              ${config.osName}_@v+@l.efi \
               ${config.osName}_@v.efi
             '';
             Mode = "0444";
