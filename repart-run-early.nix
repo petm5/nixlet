@@ -12,14 +12,8 @@ in
           "PATH=${pkgs.btrfs-progs}/bin" # Help systemd-repart to find btrfs-progs
         ];
       };
-      requiredBy = [ 
-        ""
-        "local-fs-pre.target"
-      ];
-      before = [
-        " "
-        "local-fs-pre.target"
-      ];
+      requiredBy = [ "local-fs-pre.target" ];
+      before = [ "local-fs-pre.target" ];
     };
   };
 }

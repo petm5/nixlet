@@ -8,7 +8,7 @@
     script = ''
       ln -s /dev/root /run/systemd/volatile-root
     '';
-    requiredBy = [ "local-fs-pre.target" ];
-    before = [ "local-fs-pre.target" "systemd-repart.service" ];
+    #requiredBy = [ "local-fs-pre.target" ];
+    #before = [ "local-fs-pre.target" "systemd-repart.service" ];
   };
 }
