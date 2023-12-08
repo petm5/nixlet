@@ -186,7 +186,7 @@ in
         # Create a secondary root partition
         "20-root-b" = {
           Type = "root";
-          Label = "${osName}_0";
+          Label = "${config.osName}_0";
           SizeMinBytes = "512M";
           SizeMaxBytes = "512M";
         };
