@@ -239,9 +239,8 @@ in
             Type = "regular-file";
             Path = "/EFI/Linux";
             PathRelativeTo = "esp";
+            # Boot counting is not supported yet, see https://github.com/NixOS/nixpkgs/pull/273062
             MatchPattern = ''
-              ${config.osName}_@v+@l-@d.efi \
-              ${config.osName}_@v+@l.efi \
               ${config.osName}_@v.efi
             '';
             Mode = "0444";
