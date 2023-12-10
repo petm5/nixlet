@@ -83,6 +83,12 @@ in
 
     systemd.services."serial-getty@ttyS0".enable = true;
 
+    # Record some image info in /etc/os-release
+    environment.etc."os-release".text = pkgs.lib.mkAfter ''
+      IMAGE_VERSION=${config.release}
+      IMAGE_ID=${config.osName}
+    '';
+
     # Mostly copied from the iso builder
     fileSystems = {
       "/" = {
