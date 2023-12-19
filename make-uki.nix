@@ -20,7 +20,7 @@ stdenv.mkDerivation {
 
   buildCommand =
   ''
-  stubLocation="${pkgs.systemd}/${stubLocation}"/linux*.efi.stub
+  stubLocation=("${pkgs.systemd}/${stubLocation}"/linux*.efi.stub)
 
   cmdlineFile=$(mktemp)
   osrelFile=$(mktemp)
