@@ -7,7 +7,7 @@
 , kernelPath
 , initrdPath
 , cmdline
-, stubLocation ? "lib/systemd/boot/efi/linux*.efi.stub"
+, stubLocation ? "lib/systemd/boot/efi"
 }:
 stdenv.mkDerivation {
   name = "kernel.efi";
@@ -51,7 +51,7 @@ stdenv.mkDerivation {
     --change-section-vma .initrd=$(printf 0x%x $initrd_offs) \
     --add-section .linux="${kernelPath}" \
     --change-section-vma .linux=$(printf 0x%x $linux_offs) \
-    "$stubLocation" "$out"
+    "$stubLocation"/linux*.efi.stub "$out"
 
   rm $cmdlineFile $osrelFile
 
