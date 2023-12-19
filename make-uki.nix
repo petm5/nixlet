@@ -20,7 +20,7 @@ stdenv.mkDerivation {
 
   buildCommand =
   ''
-  stubLocation="${pkgs.systemd}/${stubLocation}"
+  stubLocation="${pkgs.systemd}/${stubLocation}"/linux*.efi.stub
 
   cmdlineFile=$(mktemp)
   osrelFile=$(mktemp)
@@ -51,7 +51,7 @@ stdenv.mkDerivation {
     --change-section-vma .initrd=$(printf 0x%x $initrd_offs) \
     --add-section .linux="${kernelPath}" \
     --change-section-vma .linux=$(printf 0x%x $linux_offs) \
-    "$stubLocation"/linux*.efi.stub "$out"
+    "$stubLocation" "$out"
 
   rm $cmdlineFile $osrelFile
 
