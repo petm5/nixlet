@@ -7,7 +7,7 @@
 , kernelPath
 , initrdPath
 , cmdline
-, stubLocation ? "lib/systemd/boot/efi/linuxx64.efi.stub"
+, stubLocation ? "lib/systemd/boot/efi/linux*.efi.stub"
 }:
 stdenv.mkDerivation {
   name = "kernel.efi";
