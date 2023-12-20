@@ -29,7 +29,7 @@ stdenv.mkDerivation {
   buildCommand =
   ''
   stubLocation=("${systemd}/lib/systemd/boot/efi/linux${efiArch}.efi.stub")
-  ukify build \
+  ${systemdForImage}/lib/systemd/ukify build \
     --efi-arch "${efiArch}" \
     --stub="$stubLocation" \
     --cmdline="${cmdline}" \
