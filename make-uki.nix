@@ -15,6 +15,9 @@ stdenv.mkDerivation {
   nativeBuildInputs = with pkgs; [ 
       # ukify requires a custom build of systemd as of now
       #(systemd.override { withUkify = true; })
+    ];
+
+  buildInputs = with pkgs; [
       bintools # ensure that objdump and objcopy are available
     ];
 
