@@ -11,7 +11,7 @@
 , stubLocation ? "lib/systemd/boot/efi"
 }:
 let
-  binutils-flags = if pkgs.system == "armv7l-linux" then "-b pei-arm-little" else "";
+  binutils-flags = if pkgs.system == "armv7l-linux" then "--target=pei-arm-little" else "";
 in
 stdenv.mkDerivation {
   name = "kernel.efi";
