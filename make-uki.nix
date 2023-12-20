@@ -25,7 +25,7 @@ stdenv.mkDerivation {
 
   buildCommand =
   ''
-  stubLocation=("${pkgs.systemd}/${stubLocation}"/linux*.efi.stub)
+  stubLocation=("${systemd}/${stubLocation}"/linux*.efi.stub)
 
   OBJCOPY="${binutils-unwrapped}/bin/objcopy"
   OBJDUMP="${binutils-unwrapped}/bin/objdump"
