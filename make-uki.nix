@@ -3,7 +3,6 @@
 
 {pkgs, lib, stdenv
 , systemd
-, binutils-unwrapped-all-targets
 , osName
 , kernelPath
 , initrdPath
@@ -27,8 +26,8 @@ stdenv.mkDerivation {
   ''
   stubLocation=("${systemd}/${stubLocation}"/linux*.efi.stub)
 
-  OBJCOPY="${binutils-unwrapped-all-targets}/bin/objcopy"
-  OBJDUMP="${binutils-unwrapped-all-targets}/bin/objdump"
+  OBJCOPY="${pkgs.binutils-unwrapped-all-targets}/bin/objcopy"
+  OBJDUMP="${pkgs.binutils-unwrapped-all-targets}/bin/objdump"
 
   cmdlineFile=$(mktemp)
   osrelFile=$(mktemp)
