@@ -3,6 +3,7 @@
 
 {pkgs, lib, stdenv
 , systemd
+, binutils-unwrapped-all-targets
 , osName
 , kernelPath
 , initrdPath
@@ -12,7 +13,7 @@
 stdenv.mkDerivation {
   name = "kernel.efi";
 
-  nativeBuildInputs = with pkgs; [ 
+  nativeBuildInputs = [ 
       # ukify requires a custom build of systemd as of now
       #(systemd.override { withUkify = true; })
       binutils-unwrapped-all-targets
@@ -26,8 +27,8 @@ stdenv.mkDerivation {
   ''
   stubLocation=("${systemd}/${stubLocation}"/linux*.efi.stub)
 
-  OBJCOPY="${pkgs.binutils-unwrapped-all-targets}/bin/objcopy"
-  OBJDUMP="${pkgs.binutils-unwrapped-all-targets}/bin/objdump"
+  OBJCOPY="${binutils-unwrapped-all-targets}/bin/objcopy"
+  OBJDUMP="${binutils-unwrapped-all-targets}/bin/objdump"
 
   cmdlineFile=$(mktemp)
   osrelFile=$(mktemp)
