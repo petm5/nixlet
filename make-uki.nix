@@ -16,10 +16,10 @@ stdenv.mkDerivation {
   nativeBuildInputs = with pkgs; [ 
       # ukify requires a custom build of systemd as of now
       #(systemd.override { withUkify = true; })
+      binutils-unwrapped-all-targets
     ];
 
   buildInputs = [
-      binutils-unwrapped-all-targets
       systemd # contains the efi stub
     ];
 
