@@ -10,6 +10,9 @@
 , cmdline
 , stubLocation ? "lib/systemd/boot/efi"
 }:
+let
+  binutils-flags = if builtins.currentSystem == "armv7l-linux" then "-b pei-arm-little" else "";
+in
 stdenv.mkDerivation {
   name = "kernel.efi";
 
@@ -30,6 +33,8 @@ stdenv.mkDerivation {
   OBJCOPY="${binutils-unwrapped-all-targets}/bin/objcopy"
   OBJDUMP="${binutils-unwrapped-all-targets}/bin/objdump"
 
+  BINFLAGS="${binutils-flags}"
+
   cmdlineFile=$(mktemp)
   osrelFile=$(mktemp)
 
@@ -40,9 +45,9 @@ stdenv.mkDerivation {
   # This works and is future-proof, but extremely ugly
   # Adapted from https://wiki.archlinux.org/title/Unified_kernel_image#Manually
 
-  align="$($OBJDUMP -p "$stubLocation" | awk '{ if ($1 == "SectionAlignment"){print $2} }')"
+  align="$($OBJDUMP $BINFLAGS -p "$stubLocation" | awk '{ if ($1 == "SectionAlignment"){print $2} }')"
   align=$((16#$align))
-  osrel_offs="$($OBJDUMP -h "$stubLocation" | awk 'NF==7 {size=strtonum("0x"$3); offset=strtonum("0x"$4)} END {print size + offset}')"
+  osrel_offs="$($OBJDUMP $BINFLAGS -h "$stubLocation" | awk 'NF==7 {size=strtonum("0x"$3); offset=strtonum("0x"$4)} END {print size + offset}')"
   osrel_offs=$((osrel_offs + "$align" - osrel_offs % "$align"))
   cmdline_offs=$((osrel_offs + $(stat -Lc%s "$osrelFile")))
   cmdline_offs=$((cmdline_offs + "$align" - cmdline_offs % "$align"))
@@ -51,7 +56,7 @@ stdenv.mkDerivation {
   linux_offs=$((initrd_offs + $(stat -Lc%s "${initrdPath}")))
   linux_offs=$((linux_offs + "$align" - linux_offs % "$align"))
 
-  $OBJCOPY \
+  $OBJCOPY $BINFLAGS \
     --add-section .osrel="$osrelFile" --change-section-vma .osrel=$(printf 0x%x $osrel_offs) \
     --add-section .cmdline="$cmdlineFile" \
     --change-section-vma .cmdline=$(printf 0x%x $cmdline_offs) \
