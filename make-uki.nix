@@ -3,6 +3,7 @@
 
 {pkgs, lib, stdenv
 , systemd
+, binutils-unwrapped
 , osName
 , kernelPath
 , initrdPath
@@ -17,7 +18,7 @@ stdenv.mkDerivation {
       #(systemd.override { withUkify = true; })
     ];
 
-  buildInputs = with pkgs; [
+  buildInputs = [
       binutils-unwrapped # ensure that objdump and objcopy are available
       systemd # contains the efi stub
     ];
