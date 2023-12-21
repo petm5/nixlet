@@ -33,7 +33,7 @@ stdenv.mkDerivation {
     --linux="${kernelPath}" \
     --initrd="${initrdPath}" \
     --os-release="NAME=${osName}" \
-    --uname="${kernelVer}"
+    --uname="${kernelVer}" \
     --output="$out"
   '';
 }
