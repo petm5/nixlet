@@ -141,6 +141,7 @@ in
       initrdPath = "${config.system.build.initialRamdisk}/${config.system.boot.loader.initrdFile}";
       cmdline = "init=${config.system.build.toplevel}/init root=${partlabelPath}/${toString version} ${toString config.boot.kernelParams}";
       osName = "${config.osName}";
+      kernelVersion = "${config.boot.kernelPackages.kernel.version}";
     };
 
     image.repart = {

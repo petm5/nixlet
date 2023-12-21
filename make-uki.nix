@@ -7,6 +7,7 @@
 , osName
 , kernelPath
 , initrdPath
+, kernelVer
 , cmdline
 }:
 let
@@ -32,6 +33,7 @@ stdenv.mkDerivation {
     --linux="${kernelPath}" \
     --initrd="${initrdPath}" \
     --os-release="NAME=${osName}" \
+    --uname="${kernelVer}"
     --output="$out"
   '';
 }
