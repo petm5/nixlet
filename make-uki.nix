@@ -18,12 +18,8 @@ in
 stdenv.mkDerivation {
   name = "kernel.efi";
 
-  nativeBuildInputs = [
-      systemdForImage
-    ];
-
   buildInputs = [
-      systemd
+      systemdForImage
     ];
 
   buildCommand =
@@ -36,7 +32,6 @@ stdenv.mkDerivation {
     --linux="${kernelPath}" \
     --initrd="${initrdPath}" \
     --os-release="NAME=${osName}" \
-    --phases="enter-initrd" \
     --output="$out"
   '';
 }
