@@ -75,10 +75,6 @@ in
       supportedFilesystems = [ "btrfs" ];
 
       loader.grub.enable = false;
-
-      kernelParams = [
-        "console=ttyS0"
-      ];
     };
 
     systemd.services."serial-getty@ttyS0".enable = true;
