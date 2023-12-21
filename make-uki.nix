@@ -36,6 +36,8 @@ stdenv.mkDerivation {
     --linux="${kernelPath}" \
     --initrd="${initrdPath}" \
     --os-release="NAME=${osName}" \
+    --pcr-banks="" \
+    --phases="" \
     --output="$out"
   '';
 }
