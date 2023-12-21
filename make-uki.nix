@@ -31,7 +31,7 @@ stdenv.mkDerivation {
     --stub="$stubLocation" \
     --cmdline="${cmdline}" \
     --linux="${kernelPath}" \
-    --initrd="${initrdPath}" \
+    --section=".initrd:binary@${initrdPath}" \
     --os-release="NAME=${osName}" \
     --uname="${kernelVer}" \
     --output="$out"
