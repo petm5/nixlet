@@ -34,6 +34,7 @@ stdenv.mkDerivation {
     --stub="$stubLocation" \
     --cmdline="${cmdline}" \
     --linux="${kernelPath}" \
+    --initrd="${initrdPath}" \
     --os-release="NAME=${osName}" \
     --output="$out"
   '';
