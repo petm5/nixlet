@@ -1,6 +1,6 @@
 # Generates a GPT disk image containing a compressed rootfs.
 
-{ config, lib, pkgs, stdenv, modulesPath, ... }:
+{ config, lib, pkgs, modulesPath, ... }:
 
 with lib;
 
@@ -15,8 +15,8 @@ let
   partlabelPath = "/dev/disk/by-partlabel";
 
   arch =
-    if stdenv.hostPlatform.system == "x86_64-linux" then "x86-64"
-    else if stdenv.hostPlatform.system == "armv7l-linux" then "arm"
+    if pkgs.stdenv.hostPlatform.system == "x86_64-linux" then "x86-64"
+    else if pkgs.stdenv.hostPlatform.system == "armv7l-linux" then "arm"
     else throw "Unsupported architecture";
 
   efiArch = pkgs.stdenv.hostPlatform.efiArch;
