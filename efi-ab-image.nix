@@ -14,6 +14,11 @@ let
 
   partlabelPath = "/dev/disk/by-partlabel";
 
+  arch =
+    if stdenv.hostPlatform.system == "x86_64-linux" then "x86-64"
+    else if stdenv.hostPlatform.system == "armv7l-linux" then "arm"
+    else throw "Unsupported architecture";
+
   efiArch = pkgs.stdenv.hostPlatform.efiArch;
 
 in
@@ -164,7 +169,7 @@ in
         };
         "root" = {
           repartConfig = {
-            Type = "root";
+            Type = "root-${arch}";
             Label = "${version}";
             CopyBlocks = "${config.system.build.squashfsStore}";
           };
