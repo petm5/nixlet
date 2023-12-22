@@ -1,6 +1,6 @@
 # Generates a GPT disk image containing a compressed rootfs.
 
-{ config, lib, pkgs, modulesPath, ... }:
+{ config, lib, pkgs, stdenv, modulesPath, ... }:
 
 with lib;
 
