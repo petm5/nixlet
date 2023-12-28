@@ -1,7 +1,7 @@
 {
   description = "Build OTA-updatable disk images for appliances";
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/23.11";
+    nixpkgs.url = "nixpkgs/nixos-unstable";
   };
   outputs = { self, nixpkgs }: {
     nixosGenerate = {
