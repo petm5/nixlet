@@ -172,7 +172,7 @@ in
             Label = "KERN-A";
             SizeMinBytes = "16M";
             SizeMaxBytes = "16M";
-            Flags = "0x10000000";
+            Flags = "0b001000000000000000000000000000000000000000000000000000000000000000";
             CopyBlocks = "${config.boot.loader.depthcharge.kernelPart}";
           };
         };
@@ -196,7 +196,6 @@ in
             Type = "root-${arch}";
             Label = "${version}";
             CopyBlocks = "${config.system.build.squashfsStore}";
-            Flags = "0b00010000000000000000000000000000000000000000000000000000000000000";
           };
         };
       };
