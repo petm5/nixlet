@@ -172,7 +172,7 @@ in
             Label = "KERN-A";
             SizeMinBytes = "16M";
             SizeMaxBytes = "16M";
-            Flags = "0xFFFFFFFFFFFFFFFF";
+            Flags = "0x00000000000000FE";
             CopyBlocks = "${config.boot.loader.depthcharge.kernelPart}";
           };
         };
