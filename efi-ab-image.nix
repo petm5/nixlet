@@ -177,16 +177,19 @@ in
           };
         };
         "20-esp" = {
-          contents = {
-            "/EFI/BOOT/BOOT${lib.toUpper efiArch}.EFI".source =
-              "${pkgs.systemd}/lib/systemd/boot/efi/systemd-boot${efiArch}.efi";
+          contents = lib.mkMerge [
+            {
+              "/EFI/BOOT/BOOT${lib.toUpper efiArch}.EFI".source =
+                "${pkgs.systemd}/lib/systemd/boot/efi/systemd-boot${efiArch}.efi";
 
-            "${kernelPath}".source =
-              "${config.system.build.uki}";
-          } // (lib.mkIf config.hardware.deviceTree.enable {
+              "${kernelPath}".source =
+                "${config.system.build.uki}";
+            }
+            (lib.mkIf config.hardware.deviceTree.enable {
             "${config.hardware.deviceTree.name}".source =
               "${config.hardware.deviceTree.dtbSource}/${config.hardware.deviceTree.name}";
-          });
+            })
+          ];
           repartConfig = {
             Type = "esp";
             Format = "vfat";
