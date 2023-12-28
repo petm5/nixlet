@@ -196,7 +196,7 @@ in
             CopyBlocks = "${config.system.build.squashfsStore}";
           };
         };
-      }
+      };
     };
 
     system.build.diskImage = config.system.build.image;
