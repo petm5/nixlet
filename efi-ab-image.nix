@@ -186,7 +186,7 @@ in
                 "${config.system.build.uki}";
             }
             (lib.mkIf config.hardware.deviceTree.enable {
-            "${config.hardware.deviceTree.name}".source =
+            "/${config.hardware.deviceTree.name}".source =
               "${config.hardware.deviceTree.dtbSource}/${config.hardware.deviceTree.name}";
             })
           ];
