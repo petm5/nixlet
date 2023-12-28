@@ -166,16 +166,14 @@ in
     image.repart = {
       name = "${config.osName}";
       partitions = {
-        (lib.mkIf config.boot.loader.depthcharge.enable {
-        "10-chromium-boot" = {
+        "10-chromium-boot" = lib.mkIf config.boot.loader.depthcharge.enable {
           repartConfig = {
-              Type = "FE3A2A5D-4F32-41A7-B725-ACCC3285A309";
-              Label = "KERN-A";
-              Flags = "0x0000000000001101";
-              CopyBlocks = "${config.boot.loader.depthcharge.kernelPart}";
-            };
+            Type = "FE3A2A5D-4F32-41A7-B725-ACCC3285A309";
+            Label = "KERN-A";
+            Flags = "0x0000000000001101";
+            CopyBlocks = "${config.boot.loader.depthcharge.kernelPart}";
           };
-        };);
+        };
         "20-esp" = {
           contents = {
             "/EFI/BOOT/BOOT${lib.toUpper efiArch}.EFI".source =
@@ -184,12 +182,12 @@ in
             "${kernelPath}".source =
               "${config.system.build.uki}";
             };
-            repartConfig = {
-              Type = "esp";
-              Format = "vfat";
-              Label = "esp";
-              SizeMinBytes = "96M";
-            };
+          repartConfig = {
+            Type = "esp";
+            Format = "vfat";
+            Label = "esp";
+            SizeMinBytes = "96M";
+          };
         };
         "30-root" = {
           repartConfig = {
