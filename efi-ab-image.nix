@@ -171,9 +171,9 @@ in
             Type = "FE3A2A5D-4F32-41A7-B725-ACCC3285A309";
             Label = "KERN-A";
             SizeMinBytes = "16M";
-            #Flags = "16842752";
-            ReadOnly = true;
-            CopyBlocks = "${config.boot.loader.depthcharge.kernelPart}";
+            SizeMaxBytes = "16M";
+            Flags = 16842752;
+            #CopyBlocks = "${config.boot.loader.depthcharge.kernelPart}";
           };
         };
         "20-esp" = {
