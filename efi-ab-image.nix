@@ -183,6 +183,9 @@ in
 
             "${kernelPath}".source =
               "${config.system.build.uki}";
+
+            "${config.hardware.deviceTree.name}".source =
+              lib.mkIf hardware.deviceTree.enable "${config.hardware.deviceTree.dtbSource}/${config.hardware.deviceTree.name}";
           };
           repartConfig = {
             Type = "esp";
