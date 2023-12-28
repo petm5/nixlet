@@ -166,14 +166,14 @@ in
     image.repart = {
       name = "${config.osName}";
       partitions = {
-        "10-chromium-boot" = lib.mkIf config.boot.loader.depthcharge.enable {
+        "10-chromium" = lib.mkIf config.boot.loader.depthcharge.enable {
           repartConfig = {
             Type = "FE3A2A5D-4F32-41A7-B725-ACCC3285A309";
             Label = "KERN-A";
             SizeMinBytes = "16M";
             SizeMaxBytes = "16M";
             Flags = 16842752;
-            #CopyBlocks = "${config.boot.loader.depthcharge.kernelPart}";
+            CopyBlocks = "${config.boot.loader.depthcharge.kernelPart}";
           };
         };
         "20-esp" = {
