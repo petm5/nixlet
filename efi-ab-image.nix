@@ -228,6 +228,7 @@ in
           Type = "home";
           Label = "${cfg.homeLabel}";
           Format = "btrfs";
+          FactoryReset = true;
         };
       };
     };
