@@ -196,7 +196,7 @@ in
             Type = "root-${arch}";
             Label = "${version}";
             CopyBlocks = "${config.system.build.squashfsStore}";
-            ReadOnly = true;
+            Flags = "0xFFFFFFFFFFFFFFFF";
           };
         };
       };
