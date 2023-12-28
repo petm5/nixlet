@@ -186,12 +186,13 @@ in
             CopyBlocks = "${config.system.build.squashfsStore}";
           };
         };
-      } ++ optionals config.depthcharge.enable {
+      } ++ optionals config.boot.loader.depthcharge.enable {
         "10-chromium-boot" = {
           repartConfig = {
             Type = "FE3A2A5D-4F32-41A7-B725-ACCC3285A309";
             Label = "KERN-A";
             Flags = "0x0000000000001101";
+            CopyBlocks = "${config.boot.loader.depthcharge.kernelPart}";
           };
         };
       };
