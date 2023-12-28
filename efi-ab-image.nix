@@ -59,6 +59,18 @@ in
         Incremental version number for releases.
       '';
     };
+    boot.loader.depthcharge.enable = lib.mkOption {
+      type = lib.types.bool;
+      description = lib.mdDoc ''
+        Whether or not to enable the ChromeOS kernel partition.
+      '';
+    };
+    boot.loader.depthcharge.kernelPart = lib.mkOption {
+      type = lib.types.str;
+      description = lib.mdDoc ''
+        This file gets written to the ChromeOS kernel partition.
+      '';
+    };
     updateUrl = lib.mkOption {
       type = lib.types.str;
       description = lib.mdDoc ''
@@ -152,7 +164,7 @@ in
     image.repart = {
       name = "${config.osName}";
       partitions = {
-        "esp" = {
+        "20-esp" = {
           contents = {
             "/EFI/BOOT/BOOT${lib.toUpper efiArch}.EFI".source =
               "${pkgs.systemd}/lib/systemd/boot/efi/systemd-boot${efiArch}.efi";
@@ -167,11 +179,19 @@ in
               SizeMinBytes = "96M";
             };
         };
-        "root" = {
+        "30-root" = {
           repartConfig = {
             Type = "root-${arch}";
             Label = "${version}";
             CopyBlocks = "${config.system.build.squashfsStore}";
+          };
+        };
+      } ++ optionals config.depthcharge.enable {
+        "10-chromium-boot" = {
+          repartConfig = {
+            Type = "FE3A2A5D-4F32-41A7-B725-ACCC3285A309";
+            Label = "KERN-A";
+            Flags = "0x0000000000001101";
           };
         };
       };
