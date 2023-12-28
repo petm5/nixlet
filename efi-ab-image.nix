@@ -186,7 +186,7 @@ in
           } // (lib.mkIf config.hardware.deviceTree.enable {
             "${config.hardware.deviceTree.name}".source =
               "${config.hardware.deviceTree.dtbSource}/${config.hardware.deviceTree.name}";
-          };);
+          });
           repartConfig = {
             Type = "esp";
             Format = "vfat";
