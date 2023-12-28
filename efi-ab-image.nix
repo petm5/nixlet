@@ -60,12 +60,14 @@ in
       '';
     };
     boot.loader.depthcharge.enable = lib.mkOption {
+      default = false;
       type = lib.types.bool;
       description = lib.mdDoc ''
         Whether or not to enable the ChromeOS kernel partition.
       '';
     };
     boot.loader.depthcharge.kernelPart = lib.mkOption {
+      default = "";
       type = lib.types.str;
       description = lib.mdDoc ''
         This file gets written to the ChromeOS kernel partition.
