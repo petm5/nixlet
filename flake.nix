@@ -1,20 +1,18 @@
 {
   description = "Build OTA-updatable disk images for appliances";
-  inputs = {
-    nixpkgs.url = "nixpkgs/nixos-unstable";
-  };
-  outputs = { self, nixpkgs }: {
+  outputs = { self }: {
+    nixosModules.appliance-image = import ./efi-ab-image.nix;
     nixosGenerate = {
       pkgs ? null,
-      lib ? nixpkgs.lib,
-      nixosSystem ? nixpkgs.lib.nixosSystem,
+      lib ? null,
+      nixosSystem ? null,
       system ? null,
       modules ? []
     }: let
       image = nixosSystem {
         inherit pkgs system lib;
         modules = [
-          ./efi-ab-image.nix
+          self.nixosModules.appliance-image
         ]
         ++ modules;
       };
