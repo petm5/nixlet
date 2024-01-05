@@ -24,11 +24,7 @@ let
   efiArch = pkgs.stdenv.hostPlatform.efiArch;
 
   userSubvols = let
-    mkUserSubvol = u: nameValuePair "~user/${u.name}" {
-      fsType = "btrfs";
-      device = "${partlabelPath}/${cfg.homeLabel}";
-      options = [ "subvol=@${u.name}" ];
-    };
+    mkUserSubvol = u: nameValuePair "" {};
     usersWithHomes = attrValues (filterAttrs (n: u: u.createHome) config.users.users);
   in listToAttrs (map mkUserSubvol usersWithHomes);
 in
