@@ -29,7 +29,7 @@ let
       device = "${partlabelPath}/${cfg.homeLabel}";
       options = [ "subvol=@${u.name}" ];
     };
-    usersWithHomes = attrValues (filterAttrs (n: v: v.createHome));
+    usersWithHomes = [];
   in listToAttrs (map mkUserSubvol usersWithHomes);
 in
 
@@ -159,7 +159,7 @@ in
         device = "${partlabelPath}/${cfg.homeLabel}";
         options = [ "subvol=@home" ];
       };
-    };
+    } // userSubvols;
 
     system.build.squashfsStore = pkgs.callPackage (modulesPath + "/../lib/make-squashfs.nix") {
       storeContents = config.system.build.toplevel;
