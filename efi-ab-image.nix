@@ -24,7 +24,7 @@ let
   efiArch = pkgs.stdenv.hostPlatform.efiArch;
 
   userSubvols = let
-    mkUserSubvol = u: nameValuePair "${u.home}" {
+    mkUserSubvol = u: nameValuePair "~user/${u.name}" {
       fsType = "btrfs";
       device = "${partlabelPath}/${cfg.homeLabel}";
       options = [ "subvol=@${u.name}" ];
