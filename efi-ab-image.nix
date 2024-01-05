@@ -159,7 +159,7 @@ in
         device = "${partlabelPath}/${cfg.homeLabel}";
         options = [ "subvol=@home" ];
       };
-    } // userSubvols;
+    };
 
     system.build.squashfsStore = pkgs.callPackage (modulesPath + "/../lib/make-squashfs.nix") {
       storeContents = config.system.build.toplevel;
