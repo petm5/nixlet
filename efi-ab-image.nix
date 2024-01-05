@@ -3,6 +3,8 @@
 { config, lib, pkgs, modulesPath, ... }:
 
 with lib;
+with lib.attrsets;
+with builtins;
 
 let
 
@@ -21,6 +23,14 @@ let
 
   efiArch = pkgs.stdenv.hostPlatform.efiArch;
 
+  userSubvols = let
+    mkUserSubvol = u: nameValuePair "${u.home}" {
+      fsType = "btrfs";
+      device = "${partlabelPath}/${cfg.homeLabel}";
+      options = [ "subvol=@${u.name}" ];
+    };
+    usersWithHomes = attrValues (filterAttrs (n: v: v.createHome));
+  in listToAttrs (map mkUserSubvol usersWithHomes);
 in
 
 {
@@ -147,8 +157,9 @@ in
       "/home" = {
         fsType = "btrfs";
         device = "${partlabelPath}/${cfg.homeLabel}";
+        options = [ "subvol=@home" ];
       };
-    };
+    } // userSubvols;
 
     system.build.squashfsStore = pkgs.callPackage (modulesPath + "/../lib/make-squashfs.nix") {
       storeContents = config.system.build.toplevel;
