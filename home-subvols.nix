@@ -1,4 +1,4 @@
-{ config, libs, ... }:
+{ config, lib, ... }:
 
 with lib.attrsets;
 with builtins;
