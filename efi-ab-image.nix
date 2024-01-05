@@ -29,7 +29,7 @@ let
       device = "${partlabelPath}/${cfg.homeLabel}";
       options = [ "subvol=@${u.name}" ];
     };
-    usersWithHomes = [];
+    usersWithHomes = attrValues (filterAttrs (n: u: u.createHome) config.users.users);
   in listToAttrs (map mkUserSubvol usersWithHomes);
 in
 
