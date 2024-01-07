@@ -1,4 +1,4 @@
-# Generates a GPT disk image containing a compressed rootfs.
+# Use systemd-repart to generate a bootable disk image
 
 { config, lib, pkgs, modulesPath, ... }:
 
@@ -26,8 +26,6 @@ in
 {
   imports = [
     (modulesPath + "/image/repart.nix")
-    ./repart-run-early.nix
-    ./link-volatile-root.nix
   ];
 
   options = {
@@ -82,74 +80,6 @@ in
   };
 
   config = {
-
-    boot = {
-      initrd = {
-        availableKernelModules = [ "squashfs" "overlay" ];
-        kernelModules = [ "loop" "overlay" ];
-
-        systemd.enable = lib.mkForce false; # See https://github.com/NixOS/nixpkgs/projects/51 and https://github.com/NixOS/nixpkgs/issues/217173
-      };
-
-      supportedFilesystems = [ "btrfs" ];
-
-      loader.grub.enable = false;
-    };
-
-    systemd.services."serial-getty@ttyS0".enable = true;
-
-    # Record some image info in /etc/os-release
-    environment.etc."os-release".text = pkgs.lib.mkAfter ''
-      IMAGE_VERSION=${config.release}
-      IMAGE_ID=${config.osName}
-    '';
-
-    # Mostly copied from the iso builder
-    fileSystems = {
-      "/" = {
-        fsType = "tmpfs";
-        options = [ "mode=0755" ];
-        neededForBoot = true;
-      };
-      
-      "/nix/.ro-store" = {
-        device = "/dev/root";
-        fsType = "squashfs";
-        neededForBoot = true;
-      };
-
-      "/nix/.rw-store" = {
-        fsType = "tmpfs";
-        options = [ "mode=0755" ];
-        neededForBoot = true;
-      };
-
-      "/nix/store" = {
-        fsType = "overlay";
-        device = "overlay";
-        options = [
-          "lowerdir=/nix/.ro-store"
-          "upperdir=/nix/.rw-store/store"
-          "workdir=/nix/.rw-store/work"
-        ];
-        depends = [
-          "/nix/.ro-store"
-          "/nix/.rw-store/store"
-          "/nix/.rw-store/work"
-        ];
-      };
-
-      "/boot" = {
-        fsType = "vfat";
-        device = "${partlabelPath}/esp";
-      };
-
-      "/home" = {
-        fsType = "btrfs";
-        device = "${partlabelPath}/${cfg.homeLabel}";
-        options = [ "subvol=@home" ];
-      };
-    };
 
     system.build.squashfsStore = pkgs.callPackage (modulesPath + "/../lib/make-squashfs.nix") {
       storeContents = config.system.build.toplevel;
@@ -208,89 +138,13 @@ in
       };
     };
 
-    system.build.diskImage = config.system.build.image;
-
-    # Expand the image on first boot
-    systemd.repart = {
-      enable = true;
-
-      partitions = {
-        # The existing root partition
-        "10-root-a" = {
-          Type = "root";
-          SizeMinBytes = "512M";
-          SizeMaxBytes = "512M";
-        };
-
-        # Create a secondary root partition
-        "20-root-b" = {
-          Type = "root";
-          Label = "_empty";
-          SizeMinBytes = "512M";
-          SizeMaxBytes = "512M";
-        };
-
-        # Create a partition for persistent data
-        "30-home" = {
-          Type = "home";
-          Label = "${cfg.homeLabel}";
-          Format = "btrfs";
-          FactoryReset = true;
-        };
-      };
-    };
-
-    systemd.sysupdate = {
-      enable = true;
-      reboot.enable = true;
-      transfers = {
-        "10-rootfs" = {
-          Transfer = {
-            Verify = "no";
-          };
-          Source = {
-            Type = "url-file";
-            Path = "${config.updateUrl}";
-            MatchPattern = "${config.osName}_@v.squashfs";
-          };
-          Target = {
-            Type = "partition";
-            MatchPartitionType = "root";
-            Path = "auto";
-            MatchPattern = "${config.osName}_@v";
-          };
-        };
-        "20-uki" = {
-          Transfer = {
-            Verify = "no";
-          };
-          Source = {
-            Type = "url-file";
-            Path = "${config.updateUrl}";
-            MatchPattern = "${config.osName}_@v.efi";
-          };
-          Target = {
-            Type = "regular-file";
-            Path = "/EFI/Linux";
-            PathRelativeTo = "esp";
-            # Boot counting is not supported yet, see https://github.com/NixOS/nixpkgs/pull/273062
-            MatchPattern = ''
-              ${config.osName}_@v.efi
-            '';
-            Mode = "0444";
-            TriesLeft = 3;
-            TriesDone = 0;
-            InstancesMax = 2;
-          };
-        };
-      };
-    };
+    system.build.diskImage = (config.system.build.image + "/image.raw");
 
     system.build.release = pkgs.callPackage ./make-release.nix {
       version = version;
       squashfsPath = config.system.build.squashfsStore;
       ukiPath = config.system.build.uki;
-      imagePath = "${config.system.build.diskImage}/image.raw";
+      imagePath = config.system.build.diskImage;
     };
   };
 }

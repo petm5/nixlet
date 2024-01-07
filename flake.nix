@@ -1,22 +1,18 @@
 {
-  description = "Build OTA-updatable disk images for appliances";
-  outputs = { self }: {
-    nixosModules.appliance-image = import ./efi-ab-image.nix;
-    nixosGenerate = {
-      pkgs ? null,
-      lib ? null,
-      nixosSystem ? null,
-      system ? null,
-      modules ? []
-    }: let
-      image = nixosSystem {
-        inherit pkgs system lib;
-        modules = [
-          self.nixosModules.appliance-image
-        ]
-        ++ modules;
-      };
-    in
-      image.config.system.build.release;
+  description = "A read-only server OS based on NixOS";
+  inputs = {
+    nixpkgs.url = github:NixOS/nixpkgs/nixos-unstable;
+  };
+  outputs = { self, nixpkgs }: {
+    packages.x86_64-linux.default = (nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      modules = [
+        ./configuration.nix
+        {
+          release = "1";
+          updateUrl = "https://github.com/peter-marshall5/nixos-appliance/releases/latest/download/";
+        }
+      ];
+    }).config.system.build.release;
   };
 }
