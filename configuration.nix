@@ -14,27 +14,34 @@ in
   imports = [
     ./image
     (modulesPath + "/profiles/image-based-appliance.nix")
-    (modulesPath + "/profiles/headless.nix")
+    (modulesPath + "/profiles/qemu-guest.nix")
   ];
 
   users.allowNoPasswordLogin = true;
 
-  boot = {
-    initrd = {
-      availableKernelModules = [ "erofs" "overlay" ];
-      kernelModules = [ "loop" "overlay" ];
+  boot.initrd = {
+    availableKernelModules = [ "erofs" "overlay" "btrfs" ];
+    kernelModules = [ "loop" "overlay" ];
 
-      systemd.enable = lib.mkForce false; # See https://github.com/NixOS/nixpkgs/projects/51 and https://github.com/NixOS/nixpkgs/issues/217173
-    };
-
-    kernelParams = [
-      "root=${partlabelPath}/${toString version}"
+    systemd.enable = true; # See https://github.com/NixOS/nixpkgs/projects/51
+    systemd.additionalUpstreamUnits = ["systemd-volatile-root.service"];
+    systemd.storePaths = [
+      "${config.boot.initrd.systemd.package}/lib/systemd/systemd-volatile-root"
+      "${pkgs.btrfs-progs}/bin/btrfs"
+      "${pkgs.btrfs-progs}/bin/mkfs.btrfs"
     ];
-
-    supportedFilesystems = [ "btrfs" ];
-
-    loader.grub.enable = false;
   };
+
+  boot.kernelParams = [
+    "systemd.volatile=overlay"
+    "console=ttyS0"
+  ];
+
+  boot.loader.grub.enable = false;
+
+  systemd.enableEmergencyMode = lib.mkForce true;
+
+  users.users.root.password = "changeme";
 
   systemd.services."serial-getty@ttyS0".enable = true;
 
@@ -44,39 +51,11 @@ in
     IMAGE_ID=${config.osName}
   '';
 
-  # Mostly copied from the iso builder
+  # Define partitions to mount
   fileSystems = {
     "/" = {
-      fsType = "tmpfs";
-      options = [ "mode=0755" ];
-      neededForBoot = true;
-    };
-
-    "/nix/.ro-store" = {
-      device = "/dev/root";
       fsType = "erofs";
-      neededForBoot = true;
-    };
-
-    "/nix/.rw-store" = {
-      fsType = "tmpfs";
-      options = [ "mode=0755" ];
-      neededForBoot = true;
-    };
-
-    "/nix/store" = {
-      fsType = "overlay";
-      device = "overlay";
-      options = [
-        "lowerdir=/nix/.ro-store"
-        "upperdir=/nix/.rw-store/store"
-        "workdir=/nix/.rw-store/work"
-      ];
-      depends = [
-        "/nix/.ro-store"
-        "/nix/.rw-store/store"
-        "/nix/.rw-store/work"
-      ];
+      device = "${partlabelPath}/${toString version}";
     };
 
     "/boot" = {
@@ -87,27 +66,12 @@ in
     "/home" = {
       fsType = "btrfs";
       device = "${partlabelPath}/${cfg.homeLabel}";
-      options = [ "subvol=@home" ];
+      options = [ "compress=zstd:4" ];
     };
-  };
-
-
-  # Help systemd to find our boot device
-  # Required for systemd-repart and systemd-sysupdate to work properly
-  systemd.services."link-volatile-root" = {
-    description = "Register boot device on volatile root";
-    script = ''
-      ln -s /dev/root /run/systemd/volatile-root
-    '';
-    unitConfig.DefaultDependencies = false; # Prevent dependency cycle
-    requiredBy = [ "local-fs.target" ];
-    before = [ "local-fs.target" ];
   };
 
   # Expand the image on first boot
   systemd.repart = {
-    enable = true;
-
     partitions = {
       # The existing root partition
       "10-root-a" = {
@@ -134,14 +98,13 @@ in
     };
   };
 
-  # Custom systemd-repart service that can handle having a tmpfs as root
-  systemd.services.systemd-repart = {
+  boot.initrd.systemd.repart.enable = true;
+
+  boot.initrd.systemd.services.systemd-repart = {
     serviceConfig = {
       Environment = [
         "PATH=${pkgs.btrfs-progs}/bin" # Help systemd-repart to find btrfs-progs
       ];
-      requiredBy = [ "local-fs.target" ];
-      before = [ "local-fs.target" ];
     };
   };
 
