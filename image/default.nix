@@ -121,7 +121,7 @@ in
           repartConfig = {
             Type = "root-${arch}";
             Label = "${version}";
-            Format = "erofs";
+            Format = "squashfs";
             Minimize = "guess";
             SplitName = "root";
           };
@@ -134,7 +134,7 @@ in
 
     system.build.release = pkgs.callPackage ./make-release.nix {
       version = version;
-      erofsPath = config.system.build.rootfs;
+      rootfsPath = config.system.build.rootfs;
       ukiPath = config.system.build.uki;
       imagePath = config.system.build.diskImage;
     };

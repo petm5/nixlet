@@ -20,9 +20,8 @@ in
   users.allowNoPasswordLogin = true;
 
   boot.initrd = {
-    availableKernelModules = [ "erofs" "overlay" "btrfs" ];
-    kernelModules = [ "loop" "overlay" ];
-
+    availableKernelModules = [ "squashfs" "overlay" "btrfs" "usb-storage" ];
+    kernelModules = [ "loop" "overlay" "usb-storage" ];
     systemd.enable = true; # See https://github.com/NixOS/nixpkgs/projects/51
     systemd.additionalUpstreamUnits = ["systemd-volatile-root.service"];
     systemd.storePaths = [
@@ -35,6 +34,7 @@ in
   boot.kernelParams = [
     "systemd.volatile=overlay"
     "console=ttyS0"
+    "console=tty0"
   ];
 
   boot.loader.grub.enable = false;
@@ -44,6 +44,7 @@ in
   users.users.root.password = "changeme";
 
   systemd.services."serial-getty@ttyS0".enable = true;
+  systemd.services."getty@tty0".enable = true;
 
   # Record some image info in /etc/os-release
   environment.etc."os-release".text = lib.mkAfter ''
@@ -54,7 +55,7 @@ in
   # Define partitions to mount
   fileSystems = {
     "/" = {
-      fsType = "erofs";
+      fsType = "squashfs";
       device = "${partlabelPath}/${toString version}";
     };
 
@@ -119,7 +120,7 @@ in
         Source = {
           Type = "url-file";
           Path = "${config.updateUrl}";
-          MatchPattern = "${config.osName}_@v.erofs";
+          MatchPattern = "${config.osName}_@v.rootfs";
         };
         Target = {
           Type = "partition";
