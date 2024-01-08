@@ -29,14 +29,6 @@ in
   ];
 
   options = {
-    diskImage.squashfsCompression = mkOption {
-      default = "zstd -Xcompression-level 6";
-      type = lib.types.str;
-      description = lib.mdDoc ''
-        Compression settings to use for the squashfs nix store.
-      '';
-      example = "zstd -Xcompression-level 6";
-    };
     diskImage.homeLabel = mkOption {
       default = "home";
       type = lib.types.str;
@@ -81,21 +73,17 @@ in
 
   config = {
 
-    system.build.squashfsStore = pkgs.callPackage (modulesPath + "/../lib/make-squashfs.nix") {
-      storeContents = config.system.build.toplevel;
-      comp = config.diskImage.squashfsCompression;
-    };
-
     system.build.uki = pkgs.callPackage ./make-uki.nix {
       kernelPath = "${config.boot.kernelPackages.kernel}/${config.system.boot.loader.kernelFile}";
       initrdPath = "${config.system.build.initialRamdisk}/${config.system.boot.loader.initrdFile}";
-      cmdline = "init=${config.system.build.toplevel}/init root=${partlabelPath}/${toString version} ${toString config.boot.kernelParams}";
+      cmdline = "init=${config.system.build.toplevel}/init ${toString config.boot.kernelParams}";
       osName = "${config.osName}";
       kernelVer = "${config.boot.kernelPackages.kernel.version}";
     };
 
     image.repart = {
       name = "${config.osName}";
+      split = true;
       partitions = {
         "10-chromium" = lib.mkIf config.boot.loader.depthcharge.enable {
           repartConfig = {
@@ -129,20 +117,24 @@ in
           };
         };
         "30-root" = {
+          storePaths = [ config.system.build.toplevel ];
           repartConfig = {
             Type = "root-${arch}";
             Label = "${version}";
-            CopyBlocks = "${config.system.build.squashfsStore}";
+            Format = "erofs";
+            Minimize = "guess";
+            SplitName = "root.erofs";
           };
         };
       };
     };
 
+    system.build.rootfs = (config.system.build.image + "/root.erofs");
     system.build.diskImage = (config.system.build.image + "/image.raw");
 
     system.build.release = pkgs.callPackage ./make-release.nix {
       version = version;
-      squashfsPath = config.system.build.squashfsStore;
+      erofsPath = config.system.build.rootfs;
       ukiPath = config.system.build.uki;
       imagePath = config.system.build.diskImage;
     };

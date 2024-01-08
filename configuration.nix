@@ -3,6 +3,8 @@ let
 
   cfg = config.diskImage;
 
+  version = "${config.osName}_${config.release}";
+
   partlabelPath = "/dev/disk/by-partlabel";
 
 in
@@ -19,11 +21,15 @@ in
 
   boot = {
     initrd = {
-      availableKernelModules = [ "squashfs" "overlay" ];
+      availableKernelModules = [ "erofs" "overlay" ];
       kernelModules = [ "loop" "overlay" ];
 
       systemd.enable = lib.mkForce false; # See https://github.com/NixOS/nixpkgs/projects/51 and https://github.com/NixOS/nixpkgs/issues/217173
     };
+
+    kernelParams = [
+      "root=${partlabelPath}/${toString version}"
+    ];
 
     supportedFilesystems = [ "btrfs" ];
 
@@ -48,7 +54,7 @@ in
 
     "/nix/.ro-store" = {
       device = "/dev/root";
-      fsType = "squashfs";
+      fsType = "erofs";
       neededForBoot = true;
     };
 
@@ -150,7 +156,7 @@ in
         Source = {
           Type = "url-file";
           Path = "${config.updateUrl}";
-          MatchPattern = "${config.osName}_@v.squashfs";
+          MatchPattern = "${config.osName}_@v.erofs";
         };
         Target = {
           Type = "partition";
