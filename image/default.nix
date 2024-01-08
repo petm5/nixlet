@@ -123,13 +123,13 @@ in
             Label = "${version}";
             Format = "erofs";
             Minimize = "guess";
-            SplitName = "root.erofs";
+            SplitName = "root";
           };
         };
       };
     };
 
-    system.build.rootfs = (config.system.build.image + "/root.erofs");
+    system.build.rootfs = (config.system.build.image + "/image.root.raw");
     system.build.diskImage = (config.system.build.image + "/image.raw");
 
     system.build.release = pkgs.callPackage ./make-release.nix {
