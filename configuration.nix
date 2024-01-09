@@ -13,6 +13,7 @@ in
 
   imports = [
     ./image
+    ./modules/systemd-firstboot.nix
     (modulesPath + "/profiles/image-based-appliance.nix")
     (modulesPath + "/profiles/qemu-guest.nix")
   ];
@@ -40,6 +41,7 @@ in
   boot.loader.grub.enable = false;
 
   systemd.enableEmergencyMode = lib.mkForce true;
+  boot.initrd.systemd.emergencyAccess = true;
 
   users.users.root.password = "changeme";
 
@@ -64,10 +66,32 @@ in
       device = "${partlabelPath}/esp";
     };
 
-    "/home" = {
+    # Use bind mounts instead of subvolumes until systemd v255 is merged
+
+    "/data" = {
       fsType = "btrfs";
-      device = "${partlabelPath}/${cfg.homeLabel}";
+      device = "${partlabelPath}/${cfg.dataLabel}";
       options = [ "compress=zstd:4" ];
+      neededForBoot = true;
+    };
+
+    "/etc" = {
+      device = "/data/etc";
+      options = [ "bind" ];
+      depends = ["/data"];
+    };
+
+    "/var" = {
+      device = "/data/var";
+      options = [ "bind" ];
+      depends = ["/data"];
+    };
+
+    "/home" = {
+      device = "/data/home";
+      options = [ "bind" ];
+      depends = ["/data"];
+      neededForBoot = true;
     };
   };
 
@@ -90,11 +114,14 @@ in
       };
 
       # Create a partition for persistent data
-      "30-home" = {
-        Type = "home";
-        Label = "${config.diskImage.homeLabel}";
+      "30-data" = {
+        Type = "linux-generic";
+        Label = "${config.diskImage.dataLabel}";
         Format = "btrfs";
+        # Subvolume creation is not supported yet
+        MakeDirectories = "/home /etc /var";
         FactoryReset = true;
+        #Encrypt = "tpm2";
       };
     };
   };

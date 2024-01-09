@@ -29,11 +29,11 @@ in
   ];
 
   options = {
-    diskImage.homeLabel = mkOption {
-      default = "home";
+    diskImage.dataLabel = mkOption {
+      default = "data";
       type = lib.types.str;
       description = lib.mdDoc ''
-        Label used for the persistent home partition.
+        Label used for the persistent data partition.
       '';
     };
     osName = lib.mkOption {
@@ -87,11 +87,11 @@ in
       partitions = {
         "10-chromium" = lib.mkIf config.boot.loader.depthcharge.enable {
           repartConfig = {
-            Type = "FE3A2A5D-4F32-41A7-B725-ACCC3285A309";
+            Type = "FE3A2A5D-4F32-41A7-B725-ACCC3285A309"; # ChromeOS Kernel
             Label = "KERN-A";
             SizeMinBytes = "16M";
             SizeMaxBytes = "16M";
-            Flags = "0b0000000100000001000000000000000000000000000000000000000000000000";
+            Flags = "0b0000000100000001000000000000000000000000000000000000000000000000"; # Prority = 1, Successful = 1
             CopyBlocks = "${config.boot.loader.depthcharge.kernelPart}";
           };
         };
@@ -124,6 +124,7 @@ in
             Format = "squashfs";
             Minimize = "guess";
             SplitName = "root";
+            MakeDirectories = "/data /home /etc /var";
           };
         };
       };
