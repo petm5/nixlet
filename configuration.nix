@@ -36,6 +36,7 @@ in
     "systemd.volatile=overlay"
     "console=ttyS0"
     "console=tty0"
+    "nomodeset"
   ];
 
   boot.loader.grub.enable = false;
