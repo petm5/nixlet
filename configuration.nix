@@ -18,8 +18,6 @@ in
     (modulesPath + "/profiles/qemu-guest.nix")
   ];
 
-  users.allowNoPasswordLogin = true;
-
   boot.initrd = {
     availableKernelModules = [ "squashfs" "overlay" "btrfs" "usb-storage" ];
     kernelModules = [ "loop" "overlay" "usb-storage" ];
@@ -36,26 +34,28 @@ in
     "systemd.volatile=overlay"
     "console=ttyS0"
     "console=tty0"
-    "nomodeset"
+    "nomodeset" # TODO: Remove graphics drivers from the final image
   ];
 
   boot.loader.grub.enable = false;
 
-  systemd.enableEmergencyMode = lib.mkForce true;
-  boot.initrd.systemd.emergencyAccess = true;
+  # Use for debugging only.
+  #systemd.enableEmergencyMode = lib.mkForce true;
+  #boot.initrd.systemd.emergencyAccess = true;
 
+  # Set a default root password for initial setup.
+  users.mutableUsers = lib.mkForce true;
   users.users.root.password = "changeme";
 
+  # Allow login on serial and tty.
   systemd.services."serial-getty@ttyS0".enable = true;
   systemd.services."getty@tty0".enable = true;
 
-  # Record some image info in /etc/os-release
   environment.etc."os-release".text = lib.mkAfter ''
     IMAGE_VERSION=${config.release}
     IMAGE_ID=${config.osName}
   '';
 
-  # Define partitions to mount
   fileSystems = {
     "/" = {
       fsType = "squashfs";
@@ -67,7 +67,7 @@ in
       device = "${partlabelPath}/esp";
     };
 
-    # Use bind mounts instead of subvolumes until systemd v255 is merged
+    # Use bind mounts instead of subvolumes until systemd v255 is merged.
 
     "/data" = {
       fsType = "btrfs";
@@ -96,17 +96,14 @@ in
     };
   };
 
-  # Expand the image on first boot
   systemd.repart = {
     partitions = {
-      # The existing root partition
       "10-root-a" = {
         Type = "root";
         SizeMinBytes = "512M";
         SizeMaxBytes = "512M";
       };
 
-      # Create a secondary root partition
       "20-root-b" = {
         Type = "root";
         Label = "_empty";
@@ -114,7 +111,6 @@ in
         SizeMaxBytes = "512M";
       };
 
-      # Create a partition for persistent data
       "30-data" = {
         Type = "linux-generic";
         Label = "${config.diskImage.dataLabel}";
@@ -122,7 +118,7 @@ in
         # Subvolume creation is not supported yet
         MakeDirectories = "/home /etc /var";
         FactoryReset = true;
-        #Encrypt = "tpm2";
+        Encrypt = "tpm2";
       };
     };
   };
