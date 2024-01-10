@@ -7,6 +7,7 @@
     packages.x86_64-linux.default = (nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
+        ./modules/system.nix
         ./configuration.nix
         {
           release = "1";
