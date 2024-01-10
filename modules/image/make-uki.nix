@@ -19,7 +19,7 @@ in
 stdenv.mkDerivation {
   name = "kernel.efi";
 
-  buildInputs = [
+  nativeBuildInputs = [
       systemdForImage
     ];
 

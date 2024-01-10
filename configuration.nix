@@ -1,8 +1,26 @@
 { config, lib, pkgs, ... }:
 
-{
+let
 
-  imports = [./modules/system.nix];
+  minimalQemu = (pkgs.qemu_kvm.override {
+    hostCpuOnly = true;
+    sdlSupport = false;
+    nixosTestRunner = true;
+    enableDocs = false;
+  }).overrideAttrs (oa: {
+    postFixup = ''
+      ${oa.postFixup or ""}
+      ${lib.optionalString (pkgs.system != "aarch64-linux") "rm -rf $out/share/qemu/edk2-arm-*"}
+    '';
+  });
+
+  minimalLibvirt = pkgs.libvirt.override {
+    enableZfs = false;
+  };
+
+in
+
+{
 
   virtualisation = {
     podman = {
@@ -12,7 +30,9 @@
     };
     libvirtd = {
       enable = true;
+      package = minimalLibvirt;
       qemu.ovmf.enable = true;
+      qemu.package = minimalQemu;
     };
   };
 
@@ -58,16 +78,5 @@
     "net.core.default_qdisc" = "fq";
     "net.ipv4.tcp_congestion_control" = "bbr";
   };
-
-  # Disable anything that we don't need to save space
-
-  documentation.enable = lib.mkDefault false;
-  documentation.info.enable = lib.mkDefault false;
-  documentation.man.enable = lib.mkDefault false;
-  documentation.nixos.enable = lib.mkDefault false;
-
-  fonts.fontconfig.enable = lib.mkDefault false;
-
-  sound.enable = false;
 
 }

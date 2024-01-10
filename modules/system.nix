@@ -13,8 +13,8 @@ in
 
   imports = [
     ./image
+    (modulesPath + "/profiles/headless.nix")
     (modulesPath + "/profiles/image-based-appliance.nix")
-    (modulesPath + "/profiles/qemu-guest.nix")
   ];
 
   boot.initrd = {
@@ -39,8 +39,8 @@ in
   boot.loader.grub.enable = false;
 
   # Use for debugging only.
-  #systemd.enableEmergencyMode = lib.mkForce true;
-  #boot.initrd.systemd.emergencyAccess = true;
+  systemd.enableEmergencyMode = lib.mkForce true;
+  boot.initrd.systemd.emergencyAccess = lib.mkForce true;
 
   # Set a default root password for initial setup.
   users.mutableUsers = lib.mkForce true;
