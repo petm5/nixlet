@@ -4,13 +4,15 @@ let
 
   minimalQemu = (pkgs.qemu_kvm.override {
     hostCpuOnly = true;
-    sdlSupport = false;
     nixosTestRunner = true;
     enableDocs = false;
+    guestAgentSupport = false;
+    capstoneSupport = false;
+    libiscsiSupport = false;
   }).overrideAttrs (oa: {
     postFixup = ''
       ${oa.postFixup or ""}
-      ${lib.optionalString (pkgs.system != "aarch64-linux") "rm -rf $out/share/qemu/edk2-arm-*"}
+      rm -rf $out/share/qemu/
     '';
   });
 
@@ -35,6 +37,10 @@ in
       qemu.package = minimalQemu;
     };
   };
+
+  environment.systemPackages = with pkgs; [
+    cloud-hypervisor
+  ];
 
   services.openssh.enable = true;
 

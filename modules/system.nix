@@ -13,7 +13,6 @@ in
 
   imports = [
     ./image
-    (modulesPath + "/profiles/headless.nix")
     (modulesPath + "/profiles/image-based-appliance.nix")
   ];
 
@@ -55,6 +54,8 @@ in
     IMAGE_ID=${config.osName}
   '';
 
+  boot.initrd.luks.devices."data".device = "${partlabelPath}/${cfg.dataLabel}";
+
   fileSystems = {
     "/" = {
       fsType = "squashfs";
@@ -70,7 +71,7 @@ in
 
     "/data" = {
       fsType = "btrfs";
-      device = "${partlabelPath}/${cfg.dataLabel}";
+      device = "/dev/mapper/data";
       options = [ "compress=zstd:4" ];
       neededForBoot = true;
     };
@@ -117,17 +118,29 @@ in
         # Subvolume creation is not supported yet
         MakeDirectories = "/home /etc /var";
         FactoryReset = true;
-        Encrypt = "tpm2";
+        Encrypt = "key-file";
       };
     };
   };
 
   boot.initrd.systemd.repart.enable = true;
 
+  boot.initrd.systemd.contents = {
+    "/etc/default-luks-key".text = "changeme";
+  };
+
   boot.initrd.systemd.services.systemd-repart = {
     serviceConfig = {
       Environment = [
         "PATH=${pkgs.btrfs-progs}/bin" # Help systemd-repart to find btrfs-progs
+      ];
+      ExecStart = [
+        " "
+        ''${config.boot.initrd.systemd.package}/bin/systemd-repart \
+          --definitions=/etc/repart.d \
+          --dry-run no \
+          --key-file=/etc/default-luks-key
+        ''
       ];
     };
   };
