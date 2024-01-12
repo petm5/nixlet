@@ -33,13 +33,33 @@ in
     "console=ttyS0"
     "console=tty0"
     "nomodeset" # TODO: Remove graphics drivers from the final image
+    "boot.panic_on_fail"
+    "panic=5"
   ];
+
+  systemd = {
+    enableEmergencyMode = lib.mkDefault false;
+    watchdog.runtimeTime = "10s";
+    watchdog.rebootTime = "30s";
+    sleep.extraConfig = ''
+      AllowSuspend=no
+      AllowHibernation=no
+    '';
+  };
+
+  services.openssh.enable = false;
+
+  # Use TCP BBR
+  boot.kernel.sysctl = {
+    "net.core.default_qdisc" = "fq";
+    "net.ipv4.tcp_congestion_control" = "bbr";
+  };
 
   boot.loader.grub.enable = false;
 
   # Use for debugging only.
-  systemd.enableEmergencyMode = lib.mkForce true;
-  boot.initrd.systemd.emergencyAccess = lib.mkForce true;
+  #systemd.enableEmergencyMode = lib.mkForce true;
+  #boot.initrd.systemd.emergencyAccess = lib.mkForce true;
 
   # Set a default root password for initial setup.
   users.mutableUsers = lib.mkForce true;

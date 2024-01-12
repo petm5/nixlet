@@ -7,8 +7,7 @@
     packages.x86_64-linux.default = (nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
-        ./modules/system.nix
-        ./configuration.nix
+        ./system.nix
         {
           release = "1";
           updateUrl = "https://github.com/peter-marshall5/nixos-appliance/releases/latest/download/";
