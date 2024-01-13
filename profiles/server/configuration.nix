@@ -5,6 +5,7 @@
   # Set a default root password for initial setup.
   users.mutableUsers = lib.mkForce true;
   users.users.root.password = "changeme";
+  diskImage.defaultLuksKey = "changeme";
 
   # Use for debugging only.
   #systemd.enableEmergencyMode = lib.mkForce true;

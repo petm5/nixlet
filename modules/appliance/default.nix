@@ -29,6 +29,12 @@ in
         Label used for the persistent data partition.
       '';
     };
+    diskImage.defaultLuksKey = lib.mkOption {
+      type = lib.types.str;
+      description = lib.mdDoc ''
+        Initial passphrase used for disk encryption.
+      '';
+    };
     osName = lib.mkOption {
       default = "nixos";
       type = lib.types.str;
@@ -252,7 +258,7 @@ in
     boot.initrd.systemd.repart.enable = true;
 
     boot.initrd.systemd.contents = {
-      "/etc/default-luks-key".text = "changeme";
+      "/etc/default-luks-key".text = cfg.defaultLuksKey;
     };
 
     boot.initrd.systemd.services.systemd-repart = {
