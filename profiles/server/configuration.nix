@@ -1,18 +1,15 @@
-{ config, lib, pkgs, modulesPath, ... }:
+{ config, lib, pkgs, ... }:
 
 {
 
-  imports = [
-    (modulesPath + "/profiles/image-based-appliance.nix")
-  ];
+  # Set a default root password for initial setup.
+  users.mutableUsers = lib.mkForce true;
+  users.users.root.password = "changeme";
 
+  # Use for debugging only.
+  #systemd.enableEmergencyMode = lib.mkForce true;
+  #boot.initrd.systemd.emergencyAccess = lib.mkForce true;
 
-  # Use TCP BBR
-  boot.kernel.sysctl = {
-    "net.core.default_qdisc" = "fq";
-    "net.ipv4.tcp_congestion_control" = "bbr";
-  };
-  
   system.stateVersion = "23.11";
 
 }

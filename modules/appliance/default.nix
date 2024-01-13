@@ -66,6 +66,7 @@ in
 
   imports = [
     (modulesPath + "/image/repart.nix")
+    (modulesPath + "/profiles/image-based-appliance.nix")
   ];
 
   config = {
@@ -169,14 +170,6 @@ in
     };
 
     boot.loader.grub.enable = false;
-
-    # Use for debugging only.
-    #systemd.enableEmergencyMode = lib.mkForce true;
-    #boot.initrd.systemd.emergencyAccess = lib.mkForce true;
-
-    # Set a default root password for initial setup.
-    users.mutableUsers = lib.mkForce true;
-    users.users.root.password = "changeme";
 
     # Allow login on serial and tty.
     systemd.services."serial-getty@ttyS0".enable = true;
@@ -325,6 +318,12 @@ in
         };
       };
 
+    };
+
+    # Use TCP BBR
+    boot.kernel.sysctl = {
+      "net.core.default_qdisc" = "fq";
+      "net.ipv4.tcp_congestion_control" = "bbr";
     };
 
   };
