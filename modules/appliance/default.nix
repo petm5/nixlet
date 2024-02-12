@@ -29,8 +29,13 @@ in
         Label used for the persistent data partition.
       '';
     };
-    diskImage.defaultLuksKey = lib.mkOption {
+    diskImage.luks.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+    };
+    diskImage.luks.defaultKey = lib.mkOption {
       type = lib.types.str;
+      default = "changeme";
       description = lib.mdDoc ''
         Initial passphrase used for disk encryption.
       '';
@@ -175,7 +180,11 @@ in
       IMAGE_ID=${config.osName}
     '';
 
-    boot.initrd.luks.devices."data".device = "${partlabelPath}/${cfg.dataLabel}";
+    boot.initrd.luks.devices = lib.mkIf cfg.luks.enable {
+      "data" = {
+        device = "${partlabelPath}/${cfg.dataLabel}";
+      };
+    };
 
     fileSystems = {
       "/" = {
@@ -192,7 +201,7 @@ in
 
       "/data" = {
         fsType = "btrfs";
-        device = "/dev/mapper/data";
+        device = if cfg.luks.enable then "/dev/mapper/data" else "${partlabelPath}/${cfg.dataLabel}";
         options = [ "compress=zstd:4" ];
         neededForBoot = true;
       };
@@ -239,7 +248,7 @@ in
           # Subvolume creation is not supported yet
           MakeDirectories = "/home /etc /var";
           FactoryReset = true;
-          Encrypt = "key-file";
+          Encrypt = lib.optionalString cfg.luks.enable "key-file";
         };
       };
     };
@@ -247,7 +256,9 @@ in
     boot.initrd.systemd.repart.enable = true;
 
     boot.initrd.systemd.contents = {
-      "/etc/default-luks-key".text = cfg.defaultLuksKey;
+      "/etc/default-luks-key" = lib.mkIf cfg.luks.enable {
+        text = cfg.luks.defaultKey;
+      };
     };
 
     boot.initrd.systemd.services.systemd-repart = {
@@ -257,11 +268,10 @@ in
         ];
         ExecStart = [
           " "
-          ''${config.boot.initrd.systemd.package}/bin/systemd-repart \
+          (lib.strings.concatStrings [ ''${config.boot.initrd.systemd.package}/bin/systemd-repart \
             --definitions=/etc/repart.d \
             --dry-run no \
-            --key-file=/etc/default-luks-key
-          ''
+          '' (lib.optionalString cfg.luks.enable " --key-file=/etc/default-luks-key") ])
         ];
       };
     };
