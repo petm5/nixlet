@@ -2,28 +2,15 @@
 
 This Nix module lets you build NixOS disk images aimed toward software appliances.
 
-## Features
+## Disk layout
 
-### Immutable
+| Name     | Contents                     |
+| -------- | ---------------------------- |
+| ESP      | Bootloader and kernel images |
+| Root A/B | Read-only system images      |
+| Data     | User data                    |
 
-- Built on the Nix package manager and nixpkgs.
-- The root filesystem is always mounted read-only
-- User data is stored on a separate partition that can be erased to perform a factory reset.
-
-### Monolithic
-
-- New system images are fetched from an update server and handled automatically by `systemd-sysupdate`.
-- Updates are applied atomically with an A/B scheme, allowing for easy rollbacks.
-
-### Minimal
-
-- The default config only includes packages required to run a basic system.
-
-### Secure
-
-- The base system comes with a minimal set of services.
-- The user data partition can optionally be encrypted with LUKS.
-- Support for secure boot and dm-verity is in progress.
+The data partition can be encrypted with LUKS.
 
 ## Usage
 
@@ -50,6 +37,9 @@ Here is an example `flake.nix` for a minimal system:
           release = "1"; # Should be a numeric version number
           updateUrl = "https://github.com/username/repo/releases/latest/download/";
 
+          # Encryption is disabled by default.
+          # diskImage.luks.enable = true;
+
           # Intended for testing only. Allows logging in as root for debugging.
           users.users.root.password = "password";
 
@@ -61,6 +51,10 @@ Here is an example `flake.nix` for a minimal system:
   };
 }
 ```
+
+## Security
+
+Support for secure boot and dm-verity is in progress.
 
 ## Notes
 
