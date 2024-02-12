@@ -5,7 +5,7 @@
   };
   outputs = { self, nixpkgs }: {
     nixosModules.appliance = ./modules/appliance;
-    packages.x86_64-linux.default = (nixpkgs.lib.nixosSystem {
+    nixosConfigurations.appliance = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
         self.nixosModules.appliance
@@ -15,6 +15,8 @@
           updateUrl = "https://github.com/peter-marshall5/nixos-appliance/releases/latest/download/";
         }
       ];
-    }).config.system.build.release;
+    };
+    packages.x86_64-linux.serverAppliance = self.nixosConfigurations.appliance.config.system.build.release;
+    packages.x86_64-linux.default = self.packages.x86_64-linux.serverAppliance;
   };
 }
