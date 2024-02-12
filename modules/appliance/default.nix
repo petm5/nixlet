@@ -98,7 +98,7 @@ in
                 "${pkgs.systemd}/lib/systemd/boot/efi/systemd-boot${efiArch}.efi";
 
               "${kernelPath}".source =
-                "${config.system.build.uki}";
+                "${config.system.build.uki}/${config.system.boot.loader.ukiFile}";
             }
             (lib.mkIf config.hardware.deviceTree.enable {
             "/${config.hardware.deviceTree.name}".source =
@@ -126,22 +126,11 @@ in
       };
     };
 
-    system.build.rootfs = (config.system.build.image + "/image.root.raw");
-    system.build.diskImage = (config.system.build.image + "/image.raw");
-
-    system.build.uki = pkgs.callPackage ./make-uki.nix {
-      kernelPath = "${config.boot.kernelPackages.kernel}/${config.system.boot.loader.kernelFile}";
-      initrdPath = "${config.system.build.initialRamdisk}/${config.system.boot.loader.initrdFile}";
-      cmdline = "init=${config.system.build.toplevel}/init ${toString config.boot.kernelParams}";
-      osName = "${config.osName}";
-      kernelVer = "${config.boot.kernelPackages.kernel.version}";
-    };
-
     system.build.release = pkgs.callPackage ./make-release.nix {
-      version = version;
-      rootfsPath = config.system.build.rootfs;
-      ukiPath = config.system.build.uki;
-      imagePath = config.system.build.diskImage;
+      inherit version;
+      rootfsPath = config.system.build.image + "/${config.osName}.root.raw";
+      imagePath = config.system.build.image + "/${config.osName}.raw";
+      ukiPath = "${config.system.build.uki}/${config.system.boot.loader.ukiFile}";
     };
   
     boot.initrd = {
