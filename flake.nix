@@ -1,5 +1,5 @@
 {
-  description = "A read-only server OS based on NixOS";
+  description = "Immutable Appliance Image builder for NixOS";
   inputs = {
     nixpkgs.url = github:NixOS/nixpkgs/nixos-unstable;
   };
