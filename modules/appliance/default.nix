@@ -125,7 +125,7 @@ in
             Format = "squashfs";
             Minimize = "guess";
             SplitName = "root";
-            MakeDirectories = "/data /home /etc /var";
+            MakeDirectories = "/home /etc /var";
           };
         };
       };
@@ -186,7 +186,9 @@ in
       };
     };
 
-    fileSystems = {
+    fileSystems = let
+      dataDevice = if cfg.luks.enable then "/dev/mapper/data" else "${partlabelPath}/${cfg.dataLabel}";
+    in {
       "/" = {
         fsType = "squashfs";
         device = "${partlabelPath}/${toString version}";
@@ -197,31 +199,19 @@ in
         device = "${partlabelPath}/esp";
       };
 
-      # Use bind mounts instead of subvolumes until systemd v255 is merged.
-
-      "/data" = {
-        fsType = "btrfs";
-        device = if cfg.luks.enable then "/dev/mapper/data" else "${partlabelPath}/${cfg.dataLabel}";
-        options = [ "compress=zstd:4" ];
-        neededForBoot = true;
-      };
-
       "/etc" = {
-        device = "/data/etc";
-        options = [ "bind" ];
-        depends = ["/data"];
+        device = dataDevice;
+        options = [ "subvol=@etc" ];
       };
 
       "/var" = {
-        device = "/data/var";
-        options = [ "bind" ];
-        depends = ["/data"];
+        device = dataDevice;
+        options = [ "subvol=@var" ];
       };
 
       "/home" = {
-        device = "/data/home";
-        options = [ "bind" ];
-        depends = ["/data"];
+        device = dataDevice;
+        options = [ "subvol=@home" ];
         neededForBoot = true;
       };
     };
@@ -245,8 +235,8 @@ in
           Type = "linux-generic";
           Label = "${config.diskImage.dataLabel}";
           Format = "btrfs";
-          # Subvolume creation is not supported yet
-          MakeDirectories = "/home /etc /var";
+          MakeDirectories = "/@home /@etc /@var";
+          Subvolumes = "/@home /@etc /@var";
           FactoryReset = true;
           Encrypt = lib.optionalString cfg.luks.enable "key-file";
         };
