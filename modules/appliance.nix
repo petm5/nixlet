@@ -77,7 +77,6 @@ in
 
   imports = [
     (modulesPath + "/image/repart.nix")
-    (modulesPath + "/profiles/image-based-appliance.nix")
   ];
 
   config = {
@@ -126,12 +125,13 @@ in
             Minimize = "guess";
             SplitName = "root";
             MakeDirectories = "/home /etc /var";
+            SizeMaxBytes = "512M";
           };
         };
       };
     };
 
-    system.build.release = pkgs.callPackage ./make-release.nix {
+    system.build.release = pkgs.callPackage ./release.nix {
       inherit version;
       rootfsPath = config.system.build.image + "/${config.osName}.root.raw";
       imagePath = config.system.build.image + "/${config.osName}.raw";
@@ -139,8 +139,7 @@ in
     };
   
     boot.initrd = {
-      availableKernelModules = [ "squashfs" "overlay" "btrfs" "usb-storage" ];
-      kernelModules = [ "loop" "overlay" "usb-storage" ];
+      kernelModules = [ "loop" "squashfs" "overlay" ];
       systemd.enable = true; # See https://github.com/NixOS/nixpkgs/projects/51
       systemd.additionalUpstreamUnits = ["systemd-volatile-root.service"];
       systemd.storePaths = [
@@ -151,29 +150,12 @@ in
     };
 
     boot.kernelParams = [
-      "systemd.volatile=overlay"
-      "console=ttyS0"
-      "console=tty0"
-      "nomodeset" # TODO: Remove graphics drivers from the final image
       "boot.panic_on_fail"
       "panic=5"
+      "systemd.volatile=overlay"
     ];
 
-    systemd = {
-      enableEmergencyMode = lib.mkDefault false;
-      watchdog.runtimeTime = "10s";
-      watchdog.rebootTime = "30s";
-      sleep.extraConfig = ''
-        AllowSuspend=no
-        AllowHibernation=no
-      '';
-    };
-
     boot.loader.grub.enable = false;
-
-    # Allow login on serial and tty.
-    systemd.services."serial-getty@ttyS0".enable = true;
-    systemd.services."getty@tty0".enable = true;
 
     environment.etc."os-release".text = lib.mkAfter ''
       IMAGE_VERSION=${config.release}
@@ -243,13 +225,13 @@ in
       };
     };
 
-    boot.initrd.systemd.repart.enable = true;
-
     boot.initrd.systemd.contents = {
       "/etc/default-luks-key" = lib.mkIf cfg.luks.enable {
         text = cfg.luks.defaultKey;
       };
     };
+
+    boot.initrd.systemd.repart.enable = true;
 
     boot.initrd.systemd.services.systemd-repart = {
       serviceConfig = {
@@ -265,6 +247,8 @@ in
         ];
       };
     };
+
+    system.switch.enable = false;
 
     systemd.sysupdate = {
       enable = true;
@@ -313,12 +297,6 @@ in
         };
       };
 
-    };
-
-    # Use TCP BBR
-    boot.kernel.sysctl = {
-      "net.core.default_qdisc" = "fq";
-      "net.ipv4.tcp_congestion_control" = "bbr";
     };
 
   };
