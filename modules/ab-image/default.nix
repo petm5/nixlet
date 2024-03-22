@@ -1,18 +1,20 @@
 { config, extendModules, lib, ... }: let
 
   imageVariant = extendModules {
-    modules = [ ./image.nix ];
+    modules = [
+      ./generate.nix
+    ];
   };
 
 in {
 
-  options.image.imageVariant = lib.mkOption {
+  options.ab-image.imageVariant = lib.mkOption {
     description = "Machine configuration to be added for the image variant";
     inherit (imageVariant) type;
     default = {};
     visible = "shallow";
   };
 
-  config.system.build.image-release = lib.mkDefault config.image.imageVariant.system.build.image-release;
+  config.system.build.ab-image = lib.mkDefault config.ab-image.imageVariant.system.build.ab-image;
 
 }

@@ -13,4 +13,9 @@ in {
     qemu.ovmf.enable = false;
   };
 
+  # Support disk arrays
+  boot.initrd.services.lvm.enable = true;
+  boot.swraid.enable = true;
+  boot.initrd.kernelModules = [ "raid0" "raid1" ];
+
 }
