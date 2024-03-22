@@ -1,26 +1,15 @@
-{ config, lib, pkgs, modulesPath, ... }:
-{
+{ config, lib, pkgs, modulesPath, ... }: {
 
-  boot.initrd.availableKernelModules = [
-    "ahci"
-    "nvme"
-    "usb-storage" "uas"
-    "virtio_net" "virtio_pci" "virtio_mmio" "virtio_blk" "virtio_scsi" "virtio_balloon" "virtio_console"
+  imports = [
+    (modulesPath + "/profiles/minimal.nix")
   ];
 
-  boot.kernelParams = [
-    "nomodeset" # TODO: Remove graphics drivers from the final image
-  ];
-
-  systemd.sleep.extraConfig = ''
-    AllowSuspend=no
-    AllowHibernation=no
-  '';
-
-  diskImage.luks.enable = true;
-
-  security.doas.wheelNeedsPassword = false;
-
-  services.openssh.enable = true;
+  # HACK: Don't include kernel modules in rootfs.
+  boot.kernel.enable = false;
+  boot.modprobeConfig.enable = false;
+  boot.bootspec.enable = false;
+  system.build = { inherit (config.boot.kernelPackages) kernel; };
+  system.modulesTree = [ config.boot.kernelPackages.kernel ] ++ config.boot.extraModulePackages;
+  boot.initrd.kernelModules = config.boot.kernelModules;
 
 }

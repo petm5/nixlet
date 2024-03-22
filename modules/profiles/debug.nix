@@ -1,11 +1,22 @@
-# Use for debugging only.
-{ lib, ... }: {
+{ lib, pkgs, ... }: {
 
+  boot.consoleLogLevel = 4;
+  boot.kernelParams = [ "console=ttyS0" ];
   systemd.enableEmergencyMode = lib.mkForce true;
   boot.initrd.systemd.emergencyAccess = lib.mkForce true;
 
-  users.users.root.password = "toor";
+  users.users."nixos" = {
+    isNormalUser = true;
+    initialPassword = "nixos";
+    group = "nixos";
+    useDefaultShell = true;
+    extraGroups = [ "wheel" ];
+  };
+  users.groups."nixos" = {};
 
-  diskImage.luks.enable = lib.mkForce false;
+  image.imageVariant.config = {
+    image.luks.enable = false;
+    systemd.sysupdate.enable = lib.mkForce false;
+  };
 
 }
