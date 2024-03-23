@@ -82,7 +82,6 @@ in
       "20-usr" = {
         repartConfig = {
           Type = "usr";
-          SplitName = "usr";
           SizeMaxBytes = "512M";
           Label = cfg.version;
           CopyBlocks = "${config.system.build.erofs}";
@@ -90,11 +89,10 @@ in
         stripNixStorePrefix = true;
       };
     };
-    image.repart.split = true;
 
     system.build.ab-image = pkgs.callPackage ./release.nix {
       inherit (cfg) version;
-      usrPath = config.system.build.image + "/${config.image.repart.imageFileBasename}.usr.raw";
+      usrPath = "${config.system.build.erofs}";
       imagePath = config.system.build.image + "/${config.image.repart.imageFileBasename}.raw";
       ukiPath = "${config.system.build.uki}/${config.system.boot.loader.ukiFile}";
     };
