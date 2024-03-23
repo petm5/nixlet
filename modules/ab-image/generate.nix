@@ -20,19 +20,6 @@ in
       type = lib.types.str;
       readOnly = true;
     };
-    uuid = lib.mkOption {
-      type = lib.types.str;
-      description = "UUID used for this release version";
-    };
-
-    espUuid = lib.mkOption {
-      type = lib.types.str;
-      default = "934d0460-d793-426e-96c6-97487505f344";
-    };
-    stateUuid = lib.mkOption {
-      type = lib.types.str;
-      default = "dd9ce593-055f-4624-bb4f-465d89384884";
-    };
 
     luks = {
       enable = lib.mkOption {
@@ -65,6 +52,11 @@ in
   imports = [(modulesPath + "/image/repart.nix")];
 
   config = lib.mkMerge ([{
+    system.build.erofs = pkgs.callPackage ./erofs.nix {
+      storeContents = [ config.system.build.toplevel ];
+      label = cfg.version;
+    };
+
     image.repart.partitions = {
       "10-esp" = {
         contents = lib.mkMerge [
@@ -83,21 +75,17 @@ in
         repartConfig = {
           Type = "esp";
           Format = "vfat";
-          Label = "esp";
+          Label = "ESP";
           SizeMinBytes = "96M";
-          UUID = cfg.espUuid;
         };
       };
       "20-usr" = {
-        storePaths = [ config.system.build.toplevel ];
         repartConfig = {
           Type = "usr";
-          Format = "squashfs";
-          Minimize = "best";
           SplitName = "usr";
           SizeMaxBytes = "512M";
           Label = cfg.version;
-          UUID = cfg.uuid;
+          CopyBlocks = "${config.system.build.erofs}";
         };
         stripNixStorePrefix = true;
       };
@@ -105,7 +93,7 @@ in
     image.repart.split = true;
 
     system.build.ab-image = pkgs.callPackage ./release.nix {
-      inherit (cfg) version uuid;
+      inherit (cfg) version;
       usrPath = config.system.build.image + "/${config.image.repart.imageFileBasename}.usr.raw";
       imagePath = config.system.build.image + "/${config.image.repart.imageFileBasename}.raw";
       ukiPath = "${config.system.build.uki}/${config.system.boot.loader.ukiFile}";
@@ -116,11 +104,11 @@ in
     fileSystems = {
       "/" = {
         fsType = "btrfs";
-        device = "PARTUUID=${cfg.stateUuid}";
+        label = "state";
       };
       "/usr" = {
-        fsType = "squashfs";
-        device = "PARTUUID=${cfg.uuid}";
+        fsType = "erofs";
+        label = cfg.version;
       };
       "/nix/store" = {
         fsType = "none";
@@ -129,7 +117,7 @@ in
       };
       "/boot" = {
         fsType = "vfat";
-        device = "PARTUUID=${cfg.espUuid}";
+        label = "ESP";
         neededForBoot = true;
       };
     };
@@ -157,7 +145,6 @@ in
         Subvolumes = "/home";
         FactoryReset = true;
         Encrypt = lib.optionalString cfg.luks.enable "key-file";
-        UUID = cfg.stateUuid;
       };
     };
     boot.initrd.systemd.services.systemd-repart = {
@@ -196,7 +183,7 @@ in
         Source = {
           Type = "url-file";
           Path = "${cfg.updates.url}";
-          MatchPattern = "${cfg.name}_@v_@u.usr";
+          MatchPattern = "${cfg.name}_@v.usr";
         };
         Target = {
           Type = "partition";

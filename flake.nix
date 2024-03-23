@@ -6,8 +6,7 @@
   outputs = { self, nixpkgs }: let
     baseUpdateUrl = "https://github.com/peter-marshall5/nixlet/releases/latest/download";
     relInfo = {
-      version = self.ref or "dirty";
-      uuid = (import ./uuid.nix) (self.rev or self.dirtyRev);
+      version = "0.1";
     };
   in {
     nixosModules.nixlet = ./modules;
@@ -18,11 +17,10 @@
         ./modules/profiles/hypervisor.nix
         ./modules/profiles/debug.nix
         {
-          system.image.id = "nixlet-hypervisor";
+          system.image.id = "hypervisor";
           system.image.version = relInfo.version;
           ab-image.imageVariant.config.ab-image = {
             updates.url = "${baseUpdateUrl}/hypervisor/";
-            uuid = relInfo.uuid;
           };
           system.stateVersion = "23.11";
         }
