@@ -6,36 +6,9 @@ The releases section contains some generic system profiles.
 
 ## Usage
 
-Nixlet can be used as a library to generate your own image-based NixOS systems.
+Nixlet can be used as a library to generate your own image-based NixOS systems. See `flake.nix` for usage.
 
-Here is an example `flake.nix` for a minimal system:
-
-```nix
-{
-  description = "Example system image";
-  inputs = {
-    nixpkgs.url = github:NixOS/nixpkgs/nixos-unstable;
-    nixlet = {
-      url = github:peter-marshall5/nixlet;
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-  };
-  outputs = { self, nixpkgs, nixlet }: {
-    packages.x86_64-linux.default = (nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      modules = [
-        nixlet.nixosModules.nixlet
-        {
-          system.image.id = "example";
-          system.image.version = "0.1";
-          ab-image.imageVariant.config.ab-image.updates.url = "https://github.com/owner/repo/releases/latest/download/";
-          system.stateVersion = "23.11";
-        }
-      ];
-    }).config.system.build.ab-image;
-  };
-}
-```
+Partition selection is based on the image UUID. It should be different for every version released.
 
 ## Disk layout
 
@@ -45,7 +18,7 @@ Here is an example `flake.nix` for a minimal system:
 | Root A/B | Read-only system images      |
 | Data     | User data                    |
 
-The data partition is encrypted with LUKS. Support for secure boot and dm-verity is in progress.
+The data partition is encrypted with LUKS (default password is blank). Support for secure boot signing and Nix store verification is in progress.
 
 ## Notes
 

@@ -35,6 +35,9 @@
   # Modules must be loaded by initrd
   boot.initrd.kernelModules = config.boot.kernelModules;
 
+  boot.kernelParams = [ "quiet" ];
+  boot.consoleLogLevel = 1;
+
   # We don't need to install a bootloader
   boot.loader.grub.enable = false;
 

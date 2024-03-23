@@ -5,13 +5,14 @@
 , usrPath
 , ukiPath
 , imagePath
+, uuid
 }:
 stdenv.mkDerivation {
   name = "release";
 
   buildCommand = ''
     mkdir $out
-    ln -s "${usrPath}" "$out/${version}.usr"
+    ln -s "${usrPath}" "$out/${version}_${uuid}.usr"
     ln -s "${ukiPath}" "$out/${version}.efi"
     ln -s "${imagePath}" "$out/${version}.img"
 

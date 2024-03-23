@@ -4,11 +4,10 @@
     nixpkgs.url = github:NixOS/nixpkgs/nixos-unstable;
   };
   outputs = { self, nixpkgs }: let
+    baseUpdateUrl = "https://github.com/peter-marshall5/nixlet/releases/latest/download";
     relInfo = {
-      system.image.id = "nixlet-hypervisor";
-      system.image.version = "0.1";
-      ab-image.imageVariant.config.ab-image.updates.url = "https://github.com/peter-marshall5/nixlet/releases/latest/download/";
-      system.stateVersion = "23.11";
+      version = self.ref or "dirty";
+      uuid = (import ./uuid.nix) (self.rev or self.dirtyRev);
     };
   in {
     nixosModules.nixlet = ./modules;
@@ -18,7 +17,15 @@
         self.nixosModules.nixlet
         ./modules/profiles/hypervisor.nix
         ./modules/profiles/debug.nix
-        relInfo
+        {
+          system.image.id = "nixlet-hypervisor";
+          system.image.version = relInfo.version;
+          ab-image.imageVariant.config.ab-image = {
+            updates.url = "${baseUpdateUrl}/hypervisor/";
+            uuid = relInfo.uuid;
+          };
+          system.stateVersion = "23.11";
+        }
       ];
     }).config.system.build.ab-image;
   };

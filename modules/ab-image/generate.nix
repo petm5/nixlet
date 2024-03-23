@@ -3,11 +3,6 @@ let
 
   cfg = config.ab-image;
 
-  arch =
-    if pkgs.stdenv.hostPlatform.system == "x86_64-linux" then "x86-64"
-    else if pkgs.stdenv.hostPlatform.system == "armv7l-linux" then "arm"
-    else throw "Unsupported architecture";
-
   efiArch = pkgs.stdenv.hostPlatform.efiArch;
 
 in
@@ -27,6 +22,16 @@ in
     };
     uuid = lib.mkOption {
       type = lib.types.str;
+      description = "UUID used for this release version";
+    };
+
+    espUuid = lib.mkOption {
+      type = lib.types.str;
+      default = "934d0460-d793-426e-96c6-97487505f344";
+    };
+    stateUuid = lib.mkOption {
+      type = lib.types.str;
+      default = "dd9ce593-055f-4624-bb4f-465d89384884";
     };
 
     luks = {
@@ -80,6 +85,7 @@ in
           Format = "vfat";
           Label = "esp";
           SizeMinBytes = "96M";
+          UUID = cfg.espUuid;
         };
       };
       "20-usr" = {
@@ -90,7 +96,8 @@ in
           Minimize = "best";
           SplitName = "usr";
           SizeMaxBytes = "512M";
-          Label = "${cfg.version}";
+          Label = cfg.version;
+          UUID = cfg.uuid;
         };
         stripNixStorePrefix = true;
       };
@@ -98,7 +105,7 @@ in
     image.repart.split = true;
 
     system.build.ab-image = pkgs.callPackage ./release.nix {
-      inherit (cfg) version;
+      inherit (cfg) version uuid;
       usrPath = config.system.build.image + "/${config.image.repart.imageFileBasename}.usr.raw";
       imagePath = config.system.build.image + "/${config.image.repart.imageFileBasename}.raw";
       ukiPath = "${config.system.build.uki}/${config.system.boot.loader.ukiFile}";
@@ -109,11 +116,11 @@ in
     fileSystems = {
       "/" = {
         fsType = "btrfs";
-        label = "state";
+        device = "PARTUUID=${cfg.stateUuid}";
       };
       "/usr" = {
         fsType = "squashfs";
-        device = "PARTLABEL=${cfg.version}";
+        device = "PARTUUID=${cfg.uuid}";
       };
       "/nix/store" = {
         fsType = "none";
@@ -122,7 +129,7 @@ in
       };
       "/boot" = {
         fsType = "vfat";
-        device = "PARTLABEL=esp";
+        device = "PARTUUID=${cfg.espUuid}";
         neededForBoot = true;
       };
     };
@@ -142,7 +149,7 @@ in
         SizeMaxBytes = "512M";
       };
 
-      "30-data" = {
+      "30-state" = {
         Type = "linux-generic";
         Label = "state";
         Format = "btrfs";
@@ -150,6 +157,7 @@ in
         Subvolumes = "/home";
         FactoryReset = true;
         Encrypt = lib.optionalString cfg.luks.enable "key-file";
+        UUID = cfg.stateUuid;
       };
     };
     boot.initrd.systemd.services.systemd-repart = {
@@ -188,11 +196,11 @@ in
         Source = {
           Type = "url-file";
           Path = "${cfg.updates.url}";
-          MatchPattern = "${cfg.name}_@v.usr";
+          MatchPattern = "${cfg.name}_@v_@u.usr";
         };
         Target = {
           Type = "partition";
-          MatchPartitionType = "root";
+          MatchPartitionType = "usr";
           Path = "auto";
           MatchPattern = "${cfg.name}_@v";
         };
