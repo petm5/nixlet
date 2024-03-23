@@ -2,7 +2,7 @@
 
 {pkgs, lib, stdenv
 , version
-, rootfsPath
+, usrPath
 , ukiPath
 , imagePath
 }:
@@ -11,7 +11,7 @@ stdenv.mkDerivation {
 
   buildCommand = ''
     mkdir $out
-    ln -s "${rootfsPath}" "$out/${version}.rootfs"
+    ln -s "${usrPath}" "$out/${version}.usr"
     ln -s "${ukiPath}" "$out/${version}.efi"
     ln -s "${imagePath}" "$out/${version}.img"
 

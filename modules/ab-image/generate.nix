@@ -15,17 +15,18 @@ in
 {
 
   options.ab-image = {
-
     name = lib.mkOption {
       default = config.system.image.id;
       type = lib.types.str;
       readOnly = true;
     };
-
     version = lib.mkOption {
       default = "${cfg.name}_${config.system.image.version}";
       type = lib.types.str;
       readOnly = true;
+    };
+    uuid = lib.mkOption {
+      type = lib.types.str;
     };
 
     luks = {
@@ -54,16 +55,13 @@ in
         '';
       };
     };
-
   };
 
-  imports = [
-    (modulesPath + "/image/repart.nix")
-  ];
+  imports = [(modulesPath + "/image/repart.nix")];
 
   config = lib.mkMerge ([{
     image.repart.partitions = {
-      "20-esp" = {
+      "10-esp" = {
         contents = lib.mkMerge [
           {
             "/EFI/BOOT/BOOT${lib.toUpper efiArch}.EFI".source =
@@ -84,28 +82,24 @@ in
           SizeMinBytes = "96M";
         };
       };
-      "30-root" = {
+      "20-usr" = {
         storePaths = [ config.system.build.toplevel ];
         repartConfig = {
-          Type = "root-${arch}";
-          Label = "${cfg.version}";
+          Type = "usr";
           Format = "squashfs";
-          Minimize = "guess";
-          SplitName = "root";
+          Minimize = "best";
+          SplitName = "usr";
           SizeMaxBytes = "512M";
+          Label = "${cfg.version}";
         };
         stripNixStorePrefix = true;
       };
     };
-
     image.repart.split = true;
-    image.repart.mkfsOptions = {
-      squashfs = [ "-comp zstd" ];
-    };
 
     system.build.ab-image = pkgs.callPackage ./release.nix {
       inherit (cfg) version;
-      rootfsPath = config.system.build.image + "/${config.image.repart.imageFileBasename}.root.raw";
+      usrPath = config.system.build.image + "/${config.image.repart.imageFileBasename}.usr.raw";
       imagePath = config.system.build.image + "/${config.image.repart.imageFileBasename}.raw";
       ukiPath = "${config.system.build.uki}/${config.system.boot.loader.ukiFile}";
     };
@@ -113,10 +107,13 @@ in
     boot.initrd.systemd.additionalUpstreamUnits = [ "initrd-usr-fs.target" ];
 
     fileSystems = {
-      # systemd expects to find the root FS here
+      "/" = {
+        fsType = "btrfs";
+        label = "state";
+      };
       "/usr" = {
         fsType = "squashfs";
-        device = "/dev/disk/by-partlabel/${cfg.version}";
+        device = "PARTLABEL=${cfg.version}";
       };
       "/nix/store" = {
         fsType = "none";
@@ -125,26 +122,21 @@ in
       };
       "/boot" = {
         fsType = "vfat";
-        device = "/dev/disk/by-partlabel/esp";
+        device = "PARTLABEL=esp";
         neededForBoot = true;
-      };
-      "/" = {
-        fsType = "btrfs";
-        device = "/dev/disk/by-partlabel/state";
-        options = [ "noexec" ];
       };
     };
 
     boot.initrd.systemd.repart.enable = true;
     systemd.repart.partitions = {
       "10-root-a" = {
-        Type = "root";
+        Type = "usr";
         SizeMinBytes = "512M";
         SizeMaxBytes = "512M";
       };
 
       "20-root-b" = {
-        Type = "root";
+        Type = "usr";
         Label = "_empty";
         SizeMinBytes = "512M";
         SizeMaxBytes = "512M";
@@ -196,7 +188,7 @@ in
         Source = {
           Type = "url-file";
           Path = "${cfg.updates.url}";
-          MatchPattern = "${cfg.name}_@v.rootfs";
+          MatchPattern = "${cfg.name}_@v.usr";
         };
         Target = {
           Type = "partition";
