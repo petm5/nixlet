@@ -93,4 +93,14 @@
   services.openssh.startWhenNeeded = true;
   services.openssh.settings.PasswordAuthentication = false;
 
+  virtualisation.vmVariant.config = {
+    virtualisation = {
+      qemu = {
+        guestAgent.enable = false;
+        package = pkgs.qemu_test;
+      };
+      diskImage = null;
+    };
+  };
+
 }
