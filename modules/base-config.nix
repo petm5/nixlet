@@ -5,6 +5,18 @@
     (modulesPath + "/profiles/perlless.nix")
   ];
 
+  # Some default filesystems
+  fileSystems = {
+    "/" = {
+      fsType = "tmpfs";
+      options = [ "mode=0755" ];
+    };
+    "/nix/store" = {
+      fsType = "ext4";
+      label = "store";
+    };
+  };
+
   # Required to allow user setup
   system.etc.overlay.mutable = true;
   users.mutableUsers = lib.mkForce true;

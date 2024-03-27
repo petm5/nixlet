@@ -2,7 +2,7 @@
 
   imports = [
     ./base-config.nix
-    ./ab-image
+    ./image/build-ab-image.nix
   ];
 
 }

@@ -10,7 +10,7 @@
     };
   in {
     nixosModules.nixlet = ./modules;
-    packages.x86_64-linux.hypervisor = (nixpkgs.lib.nixosSystem {
+    nixosConfigurations.hypervisor = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
         self.nixosModules.nixlet
@@ -24,6 +24,7 @@
           system.stateVersion = "23.11";
         }
       ];
-    }).config.system.build.ab-image;
+    };
+    packages.x86_64-linux.hypervisor = self.nixosConfigurations.hypervisor.config.system.build.ab-image;
   };
 }

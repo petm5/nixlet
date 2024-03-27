@@ -2,7 +2,7 @@
 
   imageVariant = extendModules {
     modules = [
-      ./generate.nix
+      ./ab-image.nix
     ];
   };
 
@@ -16,5 +16,6 @@ in {
   };
 
   config.system.build.ab-image = lib.mkDefault config.ab-image.imageVariant.system.build.ab-image;
+  config.system.build.ab-image-test = lib.mkDefault config.ab-image.imageVariant.system.build.vmVariantWithBootloader;
 
 }

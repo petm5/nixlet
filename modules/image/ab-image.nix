@@ -90,7 +90,7 @@ in
       };
     };
 
-    system.build.ab-image = pkgs.callPackage ./release.nix {
+    system.build.ab-image = pkgs.callPackage ./ab-image-release.nix {
       inherit (cfg) version;
       usrPath = "${config.system.build.erofs}";
       imagePath = config.system.build.image + "/${config.image.repart.imageFileBasename}.raw";
@@ -99,7 +99,7 @@ in
 
     boot.initrd.systemd.additionalUpstreamUnits = [ "initrd-usr-fs.target" ];
 
-    fileSystems = {
+    fileSystems = lib.mkOverride 50 {
       "/" = {
         fsType = "btrfs";
         label = "state";
