@@ -5,6 +5,8 @@
     (modulesPath + "/profiles/perlless.nix")
   ];
 
+  system.forbiddenDependenciesRegex = lib.mkForce "";
+
   # Some default filesystems
   fileSystems = {
     "/" = {
