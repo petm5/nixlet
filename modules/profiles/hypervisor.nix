@@ -13,6 +13,8 @@ in {
     qemu.ovmf.enable = false;
   };
 
+  boot.enableContainers = true;
+
   # Support disk arrays
   boot.initrd.services.lvm.enable = true;
   boot.swraid.enable = true;

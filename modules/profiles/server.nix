@@ -19,4 +19,5 @@
   security.doas.wheelNeedsPassword = false;
 
   services.openssh.enable = true;
+
 }
