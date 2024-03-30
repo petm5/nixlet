@@ -49,8 +49,10 @@
   # Modules must be loaded by initrd
   boot.initrd.kernelModules = config.boot.kernelModules;
 
-  boot.kernelParams = [ "quiet" ];
+  boot.kernelParams = [ "quiet" "console=tty0" "console=ttyS0,115200n8" ];
   boot.consoleLogLevel = 1;
+
+  boot.tmp.useTmpfs = true;
 
   # We don't need to install a bootloader
   boot.loader.grub.enable = false;
@@ -96,12 +98,14 @@
   services.openssh.settings.PasswordAuthentication = false;
 
   virtualisation.vmVariant.config = {
+    boot.kernel.enable = lib.mkForce true;
     virtualisation = {
       qemu = {
         guestAgent.enable = false;
         package = pkgs.qemu_test;
       };
       diskImage = null;
+      graphics = false;
     };
   };
 

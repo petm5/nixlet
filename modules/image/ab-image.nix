@@ -22,10 +22,6 @@ in
     };
 
     luks = {
-      enable = lib.mkOption {
-        type = lib.types.bool;
-        default = true;
-      };
       defaultKey = lib.mkOption {
         type = lib.types.str;
         default = "";
@@ -75,8 +71,8 @@ in
         repartConfig = {
           Type = "esp";
           Format = "vfat";
-          Label = "ESP";
           SizeMinBytes = "96M";
+          UUID = "d319d3ec-c532-4100-86b4-7e10459ffdc3";
         };
       };
       "20-usr" = {
@@ -102,7 +98,12 @@ in
     fileSystems = lib.mkOverride 50 {
       "/" = {
         fsType = "btrfs";
-        label = "state";
+        device = "/dev/mapper/state";
+        encrypted = {
+          enable = true;
+          blkDev = "/dev/disk/by-partuuid/0972a97f-388e-4306-b0b2-ca4ece8833f5";
+          label = "state";
+        };
       };
       "/usr" = {
         fsType = "erofs";
@@ -115,7 +116,7 @@ in
       };
       "/boot" = {
         fsType = "vfat";
-        label = "ESP";
+        device = "/dev/disk/by-partuuid/d319d3ec-c532-4100-86b4-7e10459ffdc3";
         neededForBoot = true;
       };
     };
@@ -142,7 +143,8 @@ in
         MakeDirectories = "/home /etc /var";
         Subvolumes = "/home";
         FactoryReset = true;
-        Encrypt = lib.optionalString cfg.luks.enable "key-file";
+        Encrypt = "key-file";
+        UUID = "0972a97f-388e-4306-b0b2-ca4ece8833f5";
       };
     };
     boot.initrd.systemd.services.systemd-repart = {
@@ -152,10 +154,11 @@ in
         ];
         ExecStart = [
           " "
-          (lib.strings.concatStrings [ ''${config.boot.initrd.systemd.package}/bin/systemd-repart \
+          ''${config.boot.initrd.systemd.package}/bin/systemd-repart \
             --definitions=/etc/repart.d \
             --dry-run no \
-          '' (lib.optionalString cfg.luks.enable " --key-file=/etc/default-luks-key") ])
+            --key-file=/etc/default-luks-key
+          ''
         ];
       };
       after = lib.mkForce [];
@@ -164,12 +167,8 @@ in
       "${pkgs.btrfs-progs}/bin/btrfs"
       "${pkgs.btrfs-progs}/bin/mkfs.btrfs"
     ];
-  }
-  (lib.mkIf cfg.luks.enable {
     boot.initrd.systemd.contents."/etc/default-luks-key".text = cfg.luks.defaultKey;
-    boot.initrd.luks.devices."state".device = "/dev/disk/by-partlabel/state";
-    fileSystems."/".device = lib.mkForce "/dev/mapper/state";
-  })
+  }
   (lib.mkIf cfg.updates.enable {
     systemd.sysupdate.enable = true;
     systemd.sysupdate.reboot.enable = lib.mkDefault true;
