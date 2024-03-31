@@ -7,6 +7,10 @@
     "virtio_net" "virtio_pci" "virtio_mmio" "virtio_blk" "virtio_scsi" "virtio_balloon" "virtio_console"
   ];
 
+  boot.kernelModules = [
+    "r8169"
+  ];
+
   boot.kernelParams = [
     "nomodeset"
   ];
