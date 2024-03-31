@@ -45,4 +45,43 @@ in {
     };
   };
 
+  environment.etc."libvirt-example/network.xml".text = ''
+    <network>
+      <name>host</name>
+      <forward mode="bridge"/>
+      <bridge name="virbr0"/>
+    </network>
+  '';
+
+  environment.etc."libvirt-example/machine.xml".text = ''
+    <domain type='kvm'>
+      <name>test</name>
+      <memory>64000</memory>
+      <vcpu>2</vcpu>
+      <os>
+        <type>hvm</type>
+        <bios useserial='yes'/>
+      </os>
+      <devices>
+        <disk type='network' device='cdrom'>
+          <driver name='qemu' type='raw'/>
+          <source protocol="https" name="nixos-23.11/latest-nixos-minimal-x86_64-linux.iso">
+            <host name="channels.nixos.org" port="443"/>
+            <ssl verify="yes"/>
+          </source>
+          <target dev='hde' bus='scsi'/>
+          <readonly/>
+        </disk>
+        <interface type='network'>
+          <model type='virtio'/>
+          <source network='host'/>
+        </interface>
+        <serial type='pty'>
+          <source path='/dev/pts/1'/>
+          <target port='0'/>
+        </serial>
+      </devices>
+    </domain>
+  '';
+
 }

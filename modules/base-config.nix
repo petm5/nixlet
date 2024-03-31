@@ -36,6 +36,9 @@
   # Fix boot warning
   environment.etc."machine-id".text = " ";
 
+  # Allow hostname change
+  environment.etc.hostname.mode = "0600";
+
   # Use latest kernel
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
