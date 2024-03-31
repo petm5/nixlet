@@ -1,9 +1,10 @@
-name: "Build"
+name: "Release"
 on:
-  pull_request:
   push:
+    tags:
+    - *
 jobs:
-  tests:
+  build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -11,8 +12,7 @@ jobs:
       with:
         nix_path: nixpkgs=channel:nixos-unstable
     - uses: DeterminateSystems/magic-nix-cache-action@v2
-    - run: nix build .#hypervisor
-    - uses: actions/upload-artifact@v4
+    - run: nix build .#hypervisor -o hypervisor
+    - uses: ncipollo/release-action@v1
       with:
-        path: result/
-    - run: echo OK
+        artifacts: "hypervisor/*"
