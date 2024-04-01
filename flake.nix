@@ -6,7 +6,7 @@
   outputs = { self, nixpkgs }: let
     baseUpdateUrl = "https://github.com/peter-marshall5/nixlet/releases/latest/download";
     relInfo = {
-      version = "0.1";
+      version = "0.2";
     };
   in {
     nixosModules.nixlet = ./modules;
