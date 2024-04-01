@@ -112,6 +112,7 @@ in
         fsType = "none";
         device = "/usr";
         options = [ "bind" ];
+        neededForBoot = true;
       };
       "/boot" = {
         fsType = "vfat";
@@ -158,19 +159,18 @@ in
             --key-file=/etc/default-luks-key
           ''
           ''
-            ${pkgs.coreutils}/bin/sleep 10
+            ${config.systemd.package}/bin/udevadm settle
           ''
         ];
       };
-      after = lib.mkForce [ ];
-      before = [ "dev-disk-by\\x2dlabel-state.device" "systemd-cryptsetup@state.service" ];
-      requiredBy = [ "systemd-cryptsetup@state.service" ];
+      wantedBy = [ "initrd-usr-fs.target" ];
+      after = lib.mkForce [];
       serviceConfig = {
         RemainAfterExit = false;
       };
       unitConfig = {
-        Before = [ " " ];
         Conflicts = [ " " ];
+        Before = [ " " "systemd-cryptsetup@state.service" ];
       };
     };
     boot.initrd.systemd.storePaths = [
