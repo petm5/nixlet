@@ -1,7 +1,7 @@
 {
   description = "Minimal image-based operating system based on NixOS";
   inputs = {
-    nixpkgs.url = github:NixOS/nixpkgs/nixos-unstable;
+    nixpkgs.url = github:NixOS/nixpkgs/nixos-unstable-small;
   };
   outputs = { self, nixpkgs }: let
     baseUpdateUrl = "https://github.com/peter-marshall5/nixlet/releases/latest/download";
