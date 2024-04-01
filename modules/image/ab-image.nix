@@ -1,4 +1,4 @@
-{ config, lib, pkgs, modulesPath, ... }:
+{ config, lib, pkgs, modulesPath, utils, ... }:
 let
 
   cfg = config.ab-image;
@@ -72,7 +72,6 @@ in
           Type = "esp";
           Format = "vfat";
           SizeMinBytes = "96M";
-          UUID = "d319d3ec-c532-4100-86b4-7e10459ffdc3";
         };
       };
       "20-usr" = {
@@ -101,7 +100,7 @@ in
         device = "/dev/mapper/state";
         encrypted = {
           enable = true;
-          blkDev = "/dev/disk/by-partuuid/0972a97f-388e-4306-b0b2-ca4ece8833f5";
+          blkDev = "/dev/disk/by-label/state";
           label = "state";
         };
       };
@@ -116,7 +115,7 @@ in
       };
       "/boot" = {
         fsType = "vfat";
-        device = "/dev/disk/by-partuuid/d319d3ec-c532-4100-86b4-7e10459ffdc3";
+        label = "ESP";
         neededForBoot = true;
       };
     };
@@ -144,7 +143,6 @@ in
         Subvolumes = "/home";
         FactoryReset = true;
         Encrypt = "key-file";
-        UUID = "0972a97f-388e-4306-b0b2-ca4ece8833f5";
       };
     };
     boot.initrd.systemd.services.systemd-repart = {
@@ -159,9 +157,21 @@ in
             --dry-run no \
             --key-file=/etc/default-luks-key
           ''
+          ''
+            ${pkgs.coreutils}/bin/sleep 10
+          ''
         ];
       };
-      after = lib.mkForce [];
+      after = lib.mkForce [ ];
+      before = [ "dev-disk-by\\x2dlabel-state.device" "systemd-cryptsetup@state.service" ];
+      requiredBy = [ "systemd-cryptsetup@state.service" ];
+      serviceConfig = {
+        RemainAfterExit = false;
+      };
+      unitConfig = {
+        Before = [ " " ];
+        Conflicts = [ " " ];
+      };
     };
     boot.initrd.systemd.storePaths = [
       "${pkgs.btrfs-progs}/bin/btrfs"
