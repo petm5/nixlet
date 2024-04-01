@@ -19,7 +19,7 @@
           system.image.id = "hypervisor";
           system.image.version = relInfo.version;
           ab-image.imageVariant.config.ab-image = {
-            updates.url = "${baseUpdateUrl}/hypervisor/";
+            updates.url = "${baseUpdateUrl}";
           };
           system.stateVersion = "23.11";
         }

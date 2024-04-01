@@ -1,4 +1,4 @@
-{
+{ lib, pkgs, ... }: {
 
   boot.initrd.availableKernelModules = [
     "ahci"
@@ -9,6 +9,12 @@
 
   boot.kernelModules = [
     "r8169"
+  ];
+
+  hardware.firmware = [
+    (pkgs.callPackage ../../pkgs/minimal-linux-firmware.nix {
+      fwDirs = [ "rtl_nic" ];
+    })
   ];
 
   boot.kernelParams = [
