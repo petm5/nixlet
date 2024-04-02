@@ -115,7 +115,7 @@ in
         options = [ "bind" ];
         neededForBoot = true;
       };
-      "/boot" = {
+      "/efi" = {
         fsType = "vfat";
         device = "/dev/disk/by-partlabel/esp";
         neededForBoot = true;

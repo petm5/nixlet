@@ -100,6 +100,7 @@
   services.openssh.startWhenNeeded = true;
   services.openssh.settings.PasswordAuthentication = false;
 
+  # Minimal VM testing
   virtualisation.vmVariant.config = {
     boot.kernel.enable = lib.mkForce true;
     virtualisation = {
@@ -111,5 +112,11 @@
       graphics = false;
     };
   };
+
+  # Partition symlinks for RAID arrays
+  boot.initrd.services.udev.rules = ''
+    ENV{ID_PART_ENTRY_UUID}=="?*", SYMLINK+="disk/by-partuuid/$env{ID_PART_ENTRY_UUID}"
+    ENV{ID_PART_ENTRY_SCHEME}=="gpt", ENV{ID_PART_ENTRY_NAME}=="?*", SYMLINK+="disk/by-partlabel/$env{ID_PART_ENTRY_NAME}"
+  '';
 
 }

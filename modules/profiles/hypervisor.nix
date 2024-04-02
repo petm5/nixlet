@@ -16,6 +16,9 @@ in {
   # Support disk arrays
   boot.initrd.services.lvm.enable = true;
   boot.swraid.enable = true;
+  boot.swraid.mdadmConf = ''
+    PROGRAM echo
+  '';
   boot.initrd.kernelModules = [ "raid0" "raid1" ];
 
   # Bridge for VM networking
