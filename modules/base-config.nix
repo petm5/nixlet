@@ -79,6 +79,7 @@
     "nft_fib_inet"
     "nft_compat"
     "nfnetlink"
+    "af_packet"
   ];
 
   # Replace sudo with doas
