@@ -72,6 +72,7 @@ in
           Type = "esp";
           Format = "vfat";
           SizeMinBytes = "96M";
+          Label = "esp";
         };
       };
       "20-usr" = {
@@ -100,7 +101,7 @@ in
         device = "/dev/mapper/state";
         encrypted = {
           enable = true;
-          blkDev = "/dev/disk/by-label/state";
+          blkDev = "/dev/disk/by-partlabel/state";
           label = "state";
         };
       };
@@ -116,7 +117,7 @@ in
       };
       "/boot" = {
         fsType = "vfat";
-        label = "ESP";
+        device = "/dev/disk/by-partlabel/esp";
         neededForBoot = true;
       };
     };
@@ -158,20 +159,9 @@ in
             --dry-run no \
             --key-file=/etc/default-luks-key
           ''
-          ''
-            ${config.systemd.package}/bin/udevadm settle
-          ''
         ];
       };
-      wantedBy = [ "initrd-usr-fs.target" ];
       after = lib.mkForce [];
-      serviceConfig = {
-        RemainAfterExit = false;
-      };
-      unitConfig = {
-        Conflicts = [ " " ];
-        Before = [ " " "systemd-cryptsetup@state.service" ];
-      };
     };
     boot.initrd.systemd.storePaths = [
       "${pkgs.btrfs-progs}/bin/btrfs"

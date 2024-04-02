@@ -15,6 +15,7 @@
       modules = [
         self.nixosModules.nixlet
         ./modules/profiles/hypervisor.nix
+        ./modules/profiles/debug.nix
         {
           system.image.id = "hypervisor";
           system.image.version = relInfo.version;
