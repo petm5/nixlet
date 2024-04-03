@@ -21,7 +21,8 @@ in {
   '';
   boot.initrd.kernelModules = [ "raid0" "raid1" ];
 
-  # Bridge for VM networking
+  boot.initrd.availableKernelModules = [ "kvm_intel" "kvm_amd" ];
+
   boot.kernelModules = [ "bridge" ];
 
   systemd.network.netdevs = {
@@ -62,7 +63,7 @@ in {
       <memory>64000</memory>
       <vcpu>2</vcpu>
       <os>
-        <type>hvm</type>
+        <type arch='x86_64' machine='pc'>hvm</type>
         <bios useserial='yes'/>
       </os>
       <devices>
@@ -72,8 +73,9 @@ in {
             <host name="channels.nixos.org" port="443"/>
             <ssl verify="yes"/>
           </source>
-          <target dev='hde' bus='scsi'/>
+          <target dev='hde' bus='ide' tray='closed'/>
           <readonly/>
+          <address type='drive' controller='0' bus='1' unit='0'/>
         </disk>
         <interface type='network'>
           <model type='virtio'/>
