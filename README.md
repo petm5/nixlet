@@ -1,10 +1,10 @@
 # Nixlet
 
-A minimal image-based OS with automatic A/B updates, made primarily for embedded situations.
+A minimal image-based NixOS builder with automatic A/B updates, made primarily for embedded situations.
 
 ## System profiles
 
-- `hypervisor`: Intended for running VMs via libvirt
+- `hypervisor`: Intended for running VMs via qemu and libvirt. (~500MB)
 
 Nixlet can be used as a library to generate your own image-based NixOS systems. See `flake.nix` for usage.
 
@@ -14,7 +14,7 @@ Nixlet can be used as a library to generate your own image-based NixOS systems. 
 | -------- | ---------------------------- |
 | ESP      | Bootloader and kernel images |
 | Root A/B | Read-only system images      |
-| Data     | User data                    |
+| State    | User data                    |
 
 The data partition is encrypted with LUKS. Support for secure boot signing and Nix store verification is in progress.
 
