@@ -57,10 +57,19 @@ in {
     </network>
   '';
 
-  environment.etc."libvirt-example/machine.xml".text = ''
+  environment.etc."libvirt-example/pool.xml".text = ''
+    <pool type='dir'>
+      <name>default</name>
+      <target>
+        <path>/var/lib/guests</path>
+      </target>
+    </pool>
+  '';
+
+  environment.etc."libvirt-example/domain.xml".text = ''
     <domain type='kvm'>
       <name>test</name>
-      <memory>64000</memory>
+      <memory>128000</memory>
       <vcpu>2</vcpu>
       <os>
         <type arch='x86_64' machine='pc'>hvm</type>
@@ -76,6 +85,11 @@ in {
           <target dev='hde' bus='ide' tray='closed'/>
           <readonly/>
           <address type='drive' controller='0' bus='1' unit='0'/>
+        </disk>
+        <disk type='volume' device='disk'>
+          <driver name='qemu' type='qcow2' queues='4' queue_size='256'/>
+          <source pool='default' volume='opcc'/>
+          <target dev='vda' bus='virtio'/>
         </disk>
         <interface type='network'>
           <model type='virtio'/>
