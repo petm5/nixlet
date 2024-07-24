@@ -1,8 +1,8 @@
 {
 
   imports = [
-    ./base-config.nix
-    ./image/build-ab-image.nix
+    ./better-defaults.nix
+    ./build-appliance.nix
   ];
 
 }

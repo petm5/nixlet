@@ -1,5 +1,8 @@
 { lib, pkgs, ... }: {
 
+  fileSystems."/".device = "/dev/vda2";
+  boot.loader.grub.devices = [ "/dev/vda" ];
+
   boot.initrd.availableKernelModules = [
     "ahci"
     "nvme"
@@ -15,10 +18,6 @@
     (pkgs.callPackage ../../pkgs/minimal-linux-firmware.nix {
       fwDirs = [ "rtl_nic" ];
     })
-  ];
-
-  boot.kernelParams = [
-    "nomodeset"
   ];
 
   systemd.sleep.extraConfig = ''

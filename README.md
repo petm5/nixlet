@@ -1,27 +1,17 @@
-# Nixlet
+# Nix Hypervisor
 
-A minimal image-based NixOS builder with automatic A/B updates, made primarily for embedded situations.
+An ultra-minimal image-based hypervisor OS with automatic A/B updates, based on NixOS.
 
-## System profiles
+## VM architecture
 
-- `hypervisor`: Intended for running VMs via qemu and libvirt. (~500MB)
+- VM instances are handled by QEMU and spawned by a systemd service
+- VM storage is handled by LVM
+- Each VM gets its own LV
+- Configuration data for each VM is stored in a special LVM LV containing metadata files
 
-Nixlet can be used as a library to generate your own image-based NixOS systems. See `flake.nix` for usage.
+## System versioning architecture
 
-## Disk layout
-
-| Name     | Contents                     |
-| -------- | ---------------------------- |
-| ESP      | Bootloader and kernel images |
-| Root A/B | Read-only system images      |
-| State    | User data                    |
-
-The data partition is encrypted with LUKS. Support for secure boot signing and Nix store verification is in progress.
-
-## Usage
-
-Just flash a release `.img` file onto any drive. The image will expand itself on first boot. The default username and password is `nixos` and the default LUKS key is blank.
-
-## Notes
-
-- NixOS unstable is required for now due to the use of bleeding-edge features in various systemd components. NixOS 24.05 will probably work once released.
+- System images are contained inside a single EFI capsule
+- These can be stored on any filesystem supported by the firmware
+- Version selection and rollbacks are handled by systemd-boot
+- Updates are handled by systemd-sysupdate

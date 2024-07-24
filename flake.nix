@@ -1,27 +1,23 @@
 {
-  description = "Minimal image-based operating system based on NixOS";
+  description = "Minimal hypervisor based on NixOS";
   inputs = {
-    nixpkgs.url = github:NixOS/nixpkgs/nixos-unstable-small;
+    nixpkgs.url = github:NixOS/nixpkgs/nixos-24.05;
   };
   outputs = { self, nixpkgs }: let
-    baseUpdateUrl = "https://github.com/peter-marshall5/nixlet/releases/latest/download";
+    baseUpdateUrl = "https://github.com/3xfc/nixlet/releases/latest/download";
     relInfo = {
-      version = "0.2";
+      version = "0.3.0";
     };
   in {
-    nixosModules.nixlet = ./modules;
     nixosConfigurations.hypervisor = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
-        self.nixosModules.nixlet
-        ./modules/profiles/hypervisor.nix
+        ./hosts/hypervisor/configuration.nix
         {
-          system.image.id = "hypervisor";
           system.image.version = relInfo.version;
-          ab-image.imageVariant.config.ab-image = {
+          appliance.applianceVariant.config.appliance = {
             updates.url = "${baseUpdateUrl}";
           };
-          system.stateVersion = "23.11";
         }
       ];
     };
