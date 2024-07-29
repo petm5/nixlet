@@ -1,4 +1,4 @@
-{ pkgs, ... }: let
+{ config, pkgs, ... }: let
   qemu = pkgs.qemu_tiny;
 in {
 
@@ -40,6 +40,19 @@ in {
     '';
   in {
     serviceConfig.ExecStart = "${script} %i";
+  };
+
+  systemd.services."start-vms" = {
+    script = ''
+      vg="vms"
+
+      for v in /dev/$vg/*; do
+        ${config.systemd.package}/bin/systemctl start "qemu-vm@$(basename "$v")"
+      done
+    '';
+    wantedBy = [ "default.target" ];
+    requires = [ "lvm.service" ];
+    after = [ "lvm.service" ];
   };
 
 }

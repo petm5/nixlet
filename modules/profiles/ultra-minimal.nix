@@ -31,21 +31,78 @@
 
   programs.nano.enable = false;
 
-  # Disable some unused systemd features
-  systemd.package = pkgs.systemd.override {
-    withAcl = false;
-    withApparmor = false;
-    withEfi = false;
-    withCryptsetup = false;
-    withRepart = false;
-    withDocumentation = false;
-    withFido2 = false;
-    withFirstboot = false;
-    withHomed = false;
-    withRemote = false;
-    withShellCompletions = false;
-    withTpm2Tss = false;
-    withVmspawn = false;
-  };
+  nixpkgs.overlays = [(self: super: {
+
+    # Ultra-minimal QEMU
+    qemu_tiny = (super.qemu_test.override {
+      enableDocs = false;
+      capstoneSupport = false;
+      guestAgentSupport = false;
+      tpmSupport = false;
+      libiscsiSupport = false;
+      usbredirSupport = false;
+      canokeySupport = false;
+      hostCpuTargets = [ "x86_64-softmmu" ];
+    }).overrideDerivation (old: {
+      postFixup = ''
+        rm -r $out/share/icons
+        cp "${pkgs.OVMF.fd + "/FV/OVMF.fd"}" $out/share/qemu/
+      '';
+      configureFlags = old.configureFlags ++ [
+        "--disable-tcg"
+        "--disable-tcg-interpreter"
+        "--disable-docs"
+        "--disable-install-blobs"
+        "--disable-slirp"
+        "--disable-virtfs"
+        "--disable-virtfs-proxy-helper"
+        "--disable-vhost-user-blk-server"
+        "--without-default-features"
+        "--enable-kvm"
+        "--disable-tools"
+      ];
+    });
+
+    # Disable some unused systemd features
+    systemd = super.systemd.override {
+      withAcl = false;
+      withApparmor = false;
+      withEfi = false;
+      withCryptsetup = false;
+      withRepart = false;
+      withDocumentation = false;
+      withFido2 = false;
+      withFirstboot = false;
+      withHomed = false;
+      withRemote = false;
+      withShellCompletions = false;
+      withTpm2Tss = false;
+      withVmspawn = false;
+    };
+
+    # There's literally no reason to have multiple systemd packages in the system closure
+    systemdMinimal = self.systemd;
+    systemdLibs = self.systemd;
+
+    systemdUkify = super.systemdMinimal.override {
+      withEfi = true;
+      withBootloader = true;
+      withUkify = true;
+    };
+
+    util-linux = super.util-linux.override {
+      ncursesSupport = false;
+      nlsSupport = false;
+    };
+
+    openssh = super.openssh.overrideAttrs (final: prev: {
+      doCheck = false;
+      doInstallCheck = false;
+      dontCheck = true;
+    });
+
+  })];
+
+  boot.uki.settings.UKI.Stub = "${pkgs.systemdUkify}/lib/systemd/boot/efi/linux${pkgs.stdenv.hostPlatform.efiArch}.efi.stub";
 
 }

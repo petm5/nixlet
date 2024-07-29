@@ -34,7 +34,7 @@
   boot.kernelModules = [ "zram" ];
 
   boot.initrd.compressor = "zstd";
-  boot.initrd.compressorArgs = [ "-8" ];
+  boot.initrd.compressorArgs = [ "-6" ];
 
   nixpkgs.overlays = [(self: super: {
 
