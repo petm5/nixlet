@@ -1,23 +1,6 @@
 { config, lib, pkgs, modulesPath, ... }: {
 
-  system.build.squashfsStore = (pkgs.callPackage (modulesPath + "/../lib/make-squashfs.nix") {
-    storeContents = [ config.system.build.toplevel ];
-    comp = "zstd -Xcompression-level 19 -b 1M";
-  });
-
-  system.build.storeRamdisk = pkgs.makeInitrdNG {
-    inherit (config.boot.initrd) compressor;
-    compressorArgs = lib.optional (config.boot.initrd.compressor == "zstd") [ "-1" ];
-    prepend = [ "${config.system.build.initialRamdisk}/initrd" ];
-
-    contents =
-      [ { object = config.system.build.squashfsStore;
-          symlink = "/nix-store.squashfs";
-        }
-      ];
-  };
-  
-  fileSystems."/" = lib.mkForce {
+  fileSystems."/" = {
     fsType = "tmpfs";
     options = [ "mode=0755" ];
   };
@@ -29,17 +12,39 @@
     neededForBoot = true;
   };
 
-  services.journald.storage = "volatile";
+  boot.initrd.availableKernelModules = [ "squashfs" "overlay" ];
+
+  boot.initrd.kernelModules = [ "loop" "overlay" ];
+
+  system.build.squashfsStore = (pkgs.callPackage (modulesPath + "/../lib/make-squashfs.nix") {
+    storeContents = [ config.system.build.toplevel ];
+    comp = "zstd -Xcompression-level 19 -b 1M";
+  });
+
+  boot.initrd.compressor = "zstd";
+  boot.initrd.compressorArgs = [ "-6" ];
+
+  system.build.bundleRamdisk = pkgs.makeInitrdNG {
+    inherit (config.boot.initrd) compressor;
+    compressorArgs = lib.optional (config.boot.initrd.compressor == "zstd") [ "-1" ];
+    prepend = [ "${config.system.build.initialRamdisk}/initrd" ];
+
+    contents =
+      [ { object = config.system.build.squashfsStore;
+          symlink = "/nix-store.squashfs";
+        }
+      ];
+  };
 
   boot.uki.settings = {
     UKI = {
-      Initrd = "${config.system.build.storeRamdisk}/initrd";
+      Initrd = "${config.system.build.bundleRamdisk}/initrd";
     };
   };
 
   boot.loader.grub.enable = false;
 
-  system.build.efi = pkgs.runCommand "system-image-bootloader-files" {} ''
+  system.build.efi = pkgs.runCommand "efi-bundle" {} ''
     mkdir -p $out
     mkdir -p $out/EFI/BOOT
     mkdir -p $out/EFI/Linux

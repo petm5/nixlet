@@ -1,28 +1,14 @@
 {
-  description = "Minimal hypervisor based on NixOS";
+  description = "Minimal image-based NixOS configuration";
   inputs = {
     nixpkgs.url = github:NixOS/nixpkgs/nixos-24.05;
   };
-  outputs = { self, nixpkgs }: let
-    baseUpdateUrl = "https://github.com/3xfc/nixlet/releases/latest/download";
-    relInfo = {
-      version = "0.3.0";
-    };
-  in {
-    nixosConfigurations.hypervisor = nixpkgs.lib.nixosSystem {
-      modules = [
-        ./hosts/hypervisor/configuration.nix
-        {
-          system.image.version = relInfo.version;
-          appliance.applianceVariant.config.appliance = {
-            updates.url = "${baseUpdateUrl}";
-          };
-          nixpkgs.buildPlatform = {
-            system = "x86_64-linux";
-          };
-        }
-      ];
-    };
-    packages.x86_64-linux.hypervisor = self.nixosConfigurations.hypervisor.config.system.build.ab-image;
+  outputs = { self, nixpkgs }: {
+    nixosModules.server-defaults = import ./modules/server-defaults;
+    nixosModules.minimal-efi-bundle = import ./modules;
+    checks."x86_64-linux".uefi-boot = (import ./tests/uefi-boot.nix {
+      pkgs = nixpkgs.legacyPackages."x86_64-linux";
+      inherit self;
+    });
   };
 }

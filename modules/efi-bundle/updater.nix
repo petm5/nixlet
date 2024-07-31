@@ -1,29 +1,19 @@
 { config, lib, pkgs, ... }: 
 let
-  cfg = config.appliance;
+  cfg = config.efi-bundle.updater;
 in {
 
-    imports = [
-      ./root-in-initrd.nix
-      ./profiles/ultra-minimal.nix
-    ];
-
-  options.appliance = {
-
-    updates = {
-      url = lib.mkOption {
-        type = lib.types.str;
-        description = lib.mdDoc ''
-          URL used by systemd-sysupdate to fetch OTA updates
-        '';
-      };
+  options.efi-bundle.updater = {
+    enable = lib.mkEnableOption "automatic updates";
+    url = lib.mkOption {
+      type = lib.types.str;
+      description = "URL used by systemd-sysupdate to fetch OTA updates";
     };
-  
   };
 
   config = {
 
-    systemd.sysupdate.enable = true;
+    systemd.sysupdate.enable = cfg.enable;
     systemd.sysupdate.reboot.enable = lib.mkDefault true;
 
     systemd.sysupdate.transfers = {
@@ -33,8 +23,8 @@ in {
         };
         Source = {
           Type = "url-file";
-          Path = "${cfg.updates.url}";
-          MatchPattern = "${config.boot.uki.name}_@v.efi";
+          Path = "${cfg.url}";
+          MatchPattern = "EFI/Linux/${config.boot.uki.name}_@v.efi";
         };
         Target = {
           Type = "regular-file";

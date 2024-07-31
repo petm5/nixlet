@@ -14,9 +14,6 @@
   # Fix boot warning
   environment.etc."machine-id".text = " ";
 
-  # Allow hostname change
-  environment.etc.hostname.mode = "0600";
-
   # Don't include kernel or its modules in rootfs
   boot.kernel.enable = false;
   boot.modprobeConfig.enable = false;
@@ -27,9 +24,14 @@
   # Modules must be loaded by initrd
   boot.initrd.kernelModules = config.boot.kernelModules;
 
-  services.openssh.startWhenNeeded = true;
+  # Causes connection reset?
+  # services.openssh.startWhenNeeded = true;
 
   programs.nano.enable = false;
+
+  i18n.supportedLocales = [
+    "en_US.UTF-8/UTF-8"
+  ];
 
   nixpkgs.overlays = [(self: super: {
 

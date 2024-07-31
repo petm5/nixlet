@@ -1,4 +1,4 @@
-{
+{ lib, ... }: {
 
   # Use TCP BBR
   boot.kernel.sysctl = {
@@ -7,16 +7,13 @@
   };
 
   # Use nftables
-  networking.nftables.enable = true;
+  networking.nftables.enable = lib.mkDefault true;
 
   # Use systemd-networkd
-  networking.useNetworkd = true;
-  systemd.network.wait-online.enable = false;
+  networking.useNetworkd = lib.mkDefault true;
+  systemd.network.wait-online.enable = lib.mkDefault false;
 
-  # Bridge that connects VMs to the network
-  networking.bridges."br0".interfaces = [ "en*" "vmtap-*" ];
-
-  # Load required modules
+  # Explicitly load networking modules
   boot.kernelModules = [
     "ip_tables"
     "x_tables"

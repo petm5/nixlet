@@ -1,8 +1,9 @@
 {
 
   imports = [
-    ./better-defaults.nix
-    ./build-appliance.nix
+    ./efi-bundle
+    ./ultra-minimal
+    ./server-defaults
   ];
 
 }
