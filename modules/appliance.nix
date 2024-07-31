@@ -10,11 +10,6 @@ in {
 
   options.appliance = {
 
-    name = lib.mkOption {
-      type = lib.types.str;
-      default = config.system.image.id;
-    };
-
     updates = {
       url = lib.mkOption {
         type = lib.types.str;
@@ -39,7 +34,7 @@ in {
         Source = {
           Type = "url-file";
           Path = "${cfg.updates.url}";
-          MatchPattern = "${cfg.name}_@v.efi";
+          MatchPattern = "${config.boot.uki.name}_@v.efi";
         };
         Target = {
           Type = "regular-file";
@@ -47,7 +42,7 @@ in {
           PathRelativeTo = "esp";
           # Boot counting is not supported yet, see https://github.com/NixOS/nixpkgs/pull/273062
           MatchPattern = ''
-            ${cfg.name}_@v.efi
+            ${config.boot.uki.name}_@v.efi
           '';
           Mode = "0444";
           TriesLeft = 3;
@@ -56,12 +51,6 @@ in {
         };
       };
     };
-
-    boot.uki.name = cfg.name;
-
-    boot.loader.grub.enable = false;
-
-    system.build.appliance = config.system.build.uki;
 
   };
 

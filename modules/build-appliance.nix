@@ -22,7 +22,7 @@ in {
   config = {
 
     system.build = {
-      appliance = lib.mkDefault config.appliance.applianceVariant.system.build.appliance;
+      appliance = lib.mkDefault config.appliance.applianceVariant.system.build.efi;
     };
 
   };

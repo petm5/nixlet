@@ -37,4 +37,17 @@
     };
   };
 
+  boot.loader.grub.enable = false;
+
+  system.build.efi = pkgs.buildEnv {
+    name = "system-image-bootloader-files";
+    paths = [
+      config.system.build.uki
+      (pkgs.runCommand "systemd-boot" {} ''
+        mkdir -p $out
+        ln -s ${pkgs.systemdUkify}/lib/systemd/boot/efi/systemd-boot*.efi $out
+      '')
+    ];
+  };
+
 }
