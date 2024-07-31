@@ -12,14 +12,17 @@
   system.image.id = "hypervisor";
 
   # Add a default user
-  users.users."nixos" = {
+  users.users."admin" = {
     isSystemUser = true;
-    initialPassword = "nixos";
     useDefaultShell = true;
-    group = "nixos";
+    group = "admin";
     extraGroups = [ "wheel" ];
+    initialHashedPassword = "$y$j9T$3sdkKywE9OTrU5Fcb0fKP1$0CJE91AceNSQfjxl3kLBOam6hvMnpEI/yk7BSaS4699";
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMjg1Y1b2YyhoC73I4is0/NRmVb3FeRmpLf2Yk8adrxq petms@peter-pc"
+    ];
   };
-  users.groups.nixos = {};
+  users.groups.admin = {};
 
   # Minimal VM testing
   # virtualisation.vmVariant.config = {

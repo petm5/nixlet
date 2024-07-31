@@ -1,6 +1,4 @@
-let
-  wanInterface = "eth0";
-in {
+{
 
   # Use TCP BBR
   boot.kernel.sysctl = {
@@ -15,18 +13,8 @@ in {
   networking.useNetworkd = true;
   systemd.network.wait-online.enable = false;
 
-  # Dynamically get a WAN IP
-  networking.interfaces."${wanInterface}".useDHCP = true;
-
-  # Internal bridge for LAN ports / VMs
-  networking.bridges."br0".interfaces = [ ];
-
-  # Do NAT between internal and external interfaces
-  networking.nat = {
-    enable = true;
-    internalInterfaces = [ "br0" ];
-    externalInterface = wanInterface;
-  };
+  # Bridge that connects VMs to the network
+  networking.bridges."br0".interfaces = [ "en*" "vmtap-*" ];
 
   # Load required modules
   boot.kernelModules = [
@@ -53,6 +41,8 @@ in {
     "ipt_rpfilter"
     "ip6t_rpfilter"
     "sch_fq"
+    "tun"
+    "tap"
   ];
 
 }

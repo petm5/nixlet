@@ -1,5 +1,9 @@
 { lib, pkgs, ... }: {
 
+  nixpkgs.hostPlatform = {
+    system = "x86_64-linux";
+  };
+
   fileSystems."/".device = "/dev/vda2";
   boot.loader.grub.devices = [ "/dev/vda" ];
 

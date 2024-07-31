@@ -10,13 +10,15 @@
     };
   in {
     nixosConfigurations.hypervisor = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
       modules = [
         ./hosts/hypervisor/configuration.nix
         {
           system.image.version = relInfo.version;
           appliance.applianceVariant.config.appliance = {
             updates.url = "${baseUpdateUrl}";
+          };
+          nixpkgs.buildPlatform = {
+            system = "x86_64-linux";
           };
         }
       ];

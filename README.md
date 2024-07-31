@@ -1,13 +1,12 @@
-# Nix Hypervisor
+# NixOS Hypervisor
 
-An ultra-minimal image-based hypervisor OS with automatic A/B updates, based on NixOS.
+An ultra-minimal image-based hypervisor with automatic A/B updates, based on NixOS.
 
 ## VM architecture
 
 - VM instances are handled by QEMU and spawned by a systemd service
-- VM storage is handled by LVM
-- Each VM gets its own LV
-- Configuration data for each VM is stored in a special LVM LV containing metadata files
+- VM storage is handled by LVM: Each VM gets its own LV
+- Configuration data for each VM is stored in the LV's name
 
 ## System versioning architecture
 

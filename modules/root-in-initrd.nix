@@ -29,6 +29,8 @@
     neededForBoot = true;
   };
 
+  services.journald.storage = "volatile";
+
   boot.uki.settings = {
     UKI = {
       Initrd = "${config.system.build.storeRamdisk}/initrd";
