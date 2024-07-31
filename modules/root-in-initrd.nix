@@ -39,15 +39,12 @@
 
   boot.loader.grub.enable = false;
 
-  system.build.efi = pkgs.buildEnv {
-    name = "system-image-bootloader-files";
-    paths = [
-      config.system.build.uki
-      (pkgs.runCommand "systemd-boot" {} ''
-        mkdir -p $out
-        ln -s ${pkgs.systemdUkify}/lib/systemd/boot/efi/systemd-boot*.efi $out
-      '')
-    ];
-  };
+  system.build.efi = pkgs.runCommand "system-image-bootloader-files" {} ''
+    mkdir -p $out
+    mkdir -p $out/EFI/BOOT
+    mkdir -p $out/EFI/Linux
+    ln -s ${pkgs.systemdUkify}/lib/systemd/boot/efi/systemd-boot*.efi $out/EFI/BOOT/BOOT${lib.toUpper config.nixpkgs.hostPlatform.efiArch}.EFI
+    ln -s ${config.system.build.uki}/* $out/EFI/Linux/
+  '';
 
 }
