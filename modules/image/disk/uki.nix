@@ -12,9 +12,7 @@
     neededForBoot = true;
   };
 
-  boot.initrd.availableKernelModules = [ "squashfs" "overlay" ];
-
-  boot.initrd.kernelModules = [ "loop" "overlay" ];
+  boot.initrd.kernelModules = [ "squashfs" "loop" "overlay" ];
 
   system.build.squashfsStore = (pkgs.callPackage (modulesPath + "/../lib/make-squashfs.nix") {
     storeContents = [ config.system.build.toplevel ];
@@ -44,7 +42,7 @@
 
   boot.loader.grub.enable = false;
 
-  system.build.efi = pkgs.runCommand "efi-bundle" {} ''
+  system.build.espContents = pkgs.runCommand "esp-contents" {} ''
     mkdir -p $out
     mkdir -p $out/EFI/BOOT
     mkdir -p $out/EFI/Linux

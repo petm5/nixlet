@@ -24,9 +24,10 @@ let
           boot.initrd.availableKernelModules = [ "virtio_net" "virtio_pci" "virtio_mmio" "virtio_blk" "virtio_scsi" "virtio_balloon" "virtio_console" ];
         }
         (pkgs.path + "/nixos/modules/testing/test-instrumentation.nix")
-        self.nixosModules.minimal-efi-bundle
+        self.nixosModules.server
+        self.nixosModules.image
       ];
-    }).config.system.build.efi;
+    }).config.system.build.espContents;
 
   startCommand = let
     qemu = qemu-common.qemuBinary pkgs.qemu_test;

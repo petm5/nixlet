@@ -1,9 +1,8 @@
 {
 
   imports = [
-    ./efi-bundle
-    ./ultra-minimal
-    ./server-defaults
+    ./config/minimal-modules.nix
+    ./config/minimal-system.nix
   ];
 
 }

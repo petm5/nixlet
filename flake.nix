@@ -4,8 +4,19 @@
     nixpkgs.url = github:NixOS/nixpkgs/nixos-24.05;
   };
   outputs = { self, nixpkgs }: {
-    nixosModules.server-defaults = import ./modules/server-defaults;
-    nixosModules.minimal-efi-bundle = import ./modules;
+    nixosModules.server = {
+      imports = [
+        ./modules
+        ./modules/profiles/server.nix
+      ];
+    };
+    nixosModules.image = {
+      imports = [
+        ./modules
+        ./modules/profiles/base.nix
+        ./modules/image/disk
+      ];
+    };
     checks."x86_64-linux".uefi-boot = (import ./tests/uefi-boot.nix {
       pkgs = nixpkgs.legacyPackages."x86_64-linux";
       inherit self;
