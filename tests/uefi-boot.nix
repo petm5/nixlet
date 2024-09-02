@@ -8,7 +8,7 @@ let
   nixos-lib = import (pkgs.path + "/nixos/lib") {};
   qemu-common = import (pkgs.path + "/nixos/lib/qemu-common.nix") { inherit lib pkgs; };
 
-  efiBundle =
+  image =
     ((import (pkgs.path + "/nixos/lib/eval-config.nix")) {
       inherit pkgs lib;
       system = null;
@@ -27,7 +27,7 @@ let
         self.nixosModules.server
         self.nixosModules.image
       ];
-    }).config.system.build.espContents;
+    }).config.system.build.image;
 
   startCommand = let
     qemu = qemu-common.qemuBinary pkgs.qemu_test;
