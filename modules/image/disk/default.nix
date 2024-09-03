@@ -44,6 +44,51 @@ in {
     };
   };
 
+  systemd.sysupdate.enable = lib.mkDefault true;
+  systemd.sysupdate.reboot.enable = lib.mkDefault true;
+
+  systemd.sysupdate.transfers = {
+    "10-uki" = {
+      Transfer = {
+        Verify = "no";
+      };
+      Source = {
+        Type = "url-file";
+        Path = "";
+        MatchPattern = "${config.boot.uki.name}_@v.efi";
+      };
+      Target = {
+        Type = "regular-file";
+        Path = "/EFI/Linux";
+        PathRelativeTo = "esp";
+        # Boot counting is not supported yet, see https://github.com/NixOS/nixpkgs/pull/273062
+        MatchPattern = ''
+          ${config.boot.uki.name}_@v.efi
+        '';
+        Mode = "0444";
+        # TriesLeft = 3;
+        # TriesDone = 0;
+        InstancesMax = 2;
+      };
+    };
+    "20-root" = {
+      Transfer = {
+        Verify = "no";
+      };
+      Source = {
+        Type = "url-file";
+        Path = "";
+        MatchPattern = "store-${config.system.image.version}.squashfs";
+      };
+      Target = {
+        Type = "partition";
+        # MatchPattern = ''
+        #   ${config.boot.uki.name}_@v.efi
+        # '';
+      };
+    };
+  };
+
   systemd.services."provision-ssh-keys" = lib.mkIf config.services.openssh.enable {
     script = ''
       mkdir -p /root/.ssh/
@@ -97,7 +142,7 @@ in {
 
   boot.initrd.luks.forceLuksSupportInInitrd = true;
 
-  system.etc.overlay.mutable = true;
+  # system.etc.overlay.mutable = true;
 
   boot.initrd.supportedFilesystems = {
     btrfs = true;

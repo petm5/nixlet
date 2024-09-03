@@ -8,6 +8,10 @@
 
     composefs = self.callPackage ../../pkgs/composefs.nix { inherit super; };
 
+    # dbus = super.dbus.override {
+    #   enableSystemd = false;
+    # };
+
   })];
 
 }

@@ -7,6 +7,19 @@
 
   boot.kernel.minimalModules = true;
 
+  system.etc.overlay.mutable = true;
+  # users.mutableUsers = true;
+
+  users.users."admin" = {
+    isNormalUser = true;
+    linger = true;
+    extraGroups = [ "wheel" ];
+  };
+
+  security.doas.wheelNeedsPassword = false;
+
   services.openssh.enable = true;
+
+  virtualisation.podman.enable = true;
 
 }
