@@ -15,8 +15,8 @@ in test-common.makeImageTest {
     machine.wait_for_unit("multi-user.target")
     machine.wait_for_unit("network-online.target")
 
-    machine.succeed("tar cv --files-from /dev/null | podman import - scratchimg")
+    machine.succeed("tar cv --files-from /dev/null | su admin -l -c 'podman import - scratchimg'")
 
-    machine.succeed("podman run --rm -v /nix/store:/nix/store -v /run/current-system/sw/bin:/bin scratchimg true")
+    machine.succeed("su admin -l -c 'podman run --rm -v /nix/store:/nix/store -v /run/current-system/sw/bin:/bin scratchimg true'")
   '';
 }
