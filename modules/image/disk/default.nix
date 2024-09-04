@@ -8,6 +8,7 @@ in {
     (modulesPath + "/image/repart.nix")
     ./updater.nix
     ./ssh.nix
+    ./encrypt.nix
   ];
 
   image.repart = {
@@ -90,11 +91,12 @@ in {
       Format = "btrfs";
       SizeMinBytes = "512M";
       SizeMaxBytes = "512M";
-      Encrypt = "tpm2";
+      Encrypt = lib.mkIf config.system.image.encrypt "tpm2";
     };
     "40-home" = {
       Type = "home";
       Format = "btrfs";
+      Encrypt = lib.mkIf config.system.image.encrypt "tpm2";
     };
   };
 

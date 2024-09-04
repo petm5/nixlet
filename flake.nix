@@ -36,7 +36,25 @@
         self.nixosModules.server
       ];
     };
+    nixosConfigurations.releaseNoTpm = nixpkgs.lib.nixosSystem {
+      modules = [
+        ({ lib, ... }: {
+          nixpkgs.hostPlatform = "x86_64-linux";
+          users.allowNoPasswordLogin = true;
+          system.stateVersion = "24.05";
+          system.image.id = "nixos-image";
+          system.image.version = "1";
+          system.image.encrypt = false;
+        })
+        {
+          boot.kernelParams = [ "quiet" "console=tty0" "console=ttyS0,115200n8" ];
+        }
+        self.nixosModules.image
+        self.nixosModules.server
+      ];
+    };
     packages.x86_64-linux.releaseImage = self.nixosConfigurations.release.config.system.build.image;
+    packages.x86_64-linux.releaseImageNoTpm = self.nixosConfigurations.releaseNoTpm.config.system.build.image;
     checks."x86_64-linux" = nixpkgs.lib.listToAttrs (map (test: nixpkgs.lib.nameValuePair "${test}" (import ./tests/${test}.nix {
       pkgs = nixpkgs.legacyPackages."x86_64-linux";
       inherit self;
