@@ -10,9 +10,11 @@ in {
 
   imports = [
     (modulesPath + "/image/repart.nix")
+    ./updater.nix
   ];
 
   image.repart = {
+    split = true;
     mkfsOptions.squashfs = [ "-comp zstd" "-Xcompression-level 19" "-b 1M" ];
     partitions = {
       "10-esp" = {
@@ -28,6 +30,7 @@ in {
           Format = "vfat";
           SizeMinBytes = "96M";
           SizeMaxBytes = "96M";
+          SplitName = "-";
         };
       };
       "20-store-a" = {
@@ -39,55 +42,29 @@ in {
           SizeMaxBytes = "256M";
           Label = "store-${config.system.image.version}";
           Format = "squashfs";
+          SplitName = "store";
         };
       };
     };
   };
 
-  systemd.sysupdate.enable = lib.mkDefault true;
-  systemd.sysupdate.reboot.enable = lib.mkDefault true;
-
-  systemd.sysupdate.transfers = {
-    "10-uki" = {
-      Transfer = {
-        Verify = "no";
-      };
-      Source = {
-        Type = "url-file";
-        Path = "";
-        MatchPattern = "${config.boot.uki.name}_@v.efi";
-      };
-      Target = {
-        Type = "regular-file";
-        Path = "/EFI/Linux";
-        PathRelativeTo = "esp";
-        # Boot counting is not supported yet, see https://github.com/NixOS/nixpkgs/pull/273062
-        MatchPattern = ''
-          ${config.boot.uki.name}_@v.efi
-        '';
-        Mode = "0444";
-        # TriesLeft = 3;
-        # TriesDone = 0;
-        InstancesMax = 2;
-      };
-    };
-    "20-root" = {
-      Transfer = {
-        Verify = "no";
-      };
-      Source = {
-        Type = "url-file";
-        Path = "";
-        MatchPattern = "store-${config.system.image.version}.squashfs";
-      };
-      Target = {
-        Type = "partition";
-        # MatchPattern = ''
-        #   ${config.boot.uki.name}_@v.efi
-        # '';
-      };
-    };
-  };
+  system.build.updatePackage = let
+    files = pkgs.linkFarm "update-files" [
+      {
+        name = "${config.system.image.id}_${config.system.image.version}.efi";
+        path = "${config.system.build.uki}/${config.system.boot.loader.ukiFile}";
+      }
+      {
+        name = "${config.system.image.id}_${config.system.image.version}.squashfs";
+        path = "${config.system.build.image}/${config.image.repart.imageFileBasename}.store.raw";
+      }
+    ];
+  in pkgs.runCommand "update-package" {} ''
+    mkdir $out
+    cd $out
+    cp "${files}"/* .
+    ${pkgs.coreutils}/bin/sha256sum * > SHA256SUMS
+  '';
 
   systemd.services."provision-ssh-keys" = lib.mkIf config.services.openssh.enable {
     script = ''

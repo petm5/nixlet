@@ -37,7 +37,7 @@
       ];
     };
     packages.x86_64-linux.releaseImage = self.nixosConfigurations.release.config.system.build.image;
-    checks."x86_64-linux".uefi-boot = (import ./tests/uefi-boot.nix {
+    checks."x86_64-linux".system-update = (import ./tests/system-update.nix {
       pkgs = nixpkgs.legacyPackages."x86_64-linux";
       inherit self;
     });
