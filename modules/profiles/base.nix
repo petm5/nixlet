@@ -42,4 +42,11 @@
 
   boot.consoleLogLevel = lib.mkDefault 1;
 
+  systemd.services."getty@tty1".enable = false;
+  systemd.services."autovt@".enable = false;
+
+  systemd.enableEmergencyMode = false;
+
+  boot.kernelParams = [ "panic=1" "boot.panic_on_fail" "nomodeset" ];
+
 }

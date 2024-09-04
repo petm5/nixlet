@@ -33,13 +33,10 @@
           Type = "regular-file";
           Path = "/EFI/Linux";
           PathRelativeTo = "esp";
-          # Boot counting is not supported yet, see https://github.com/NixOS/nixpkgs/pull/273062
-          MatchPattern = ''
-            ${config.boot.uki.name}_@v.efi
-          '';
+          MatchPattern = "${config.boot.uki.name}_@v+@l-@d.efi ${config.boot.uki.name}_@v+@l.efi ${config.boot.uki.name}_@v.efi";
           Mode = "0444";
-          # TriesLeft = 3;
-          # TriesDone = 0;
+          TriesLeft = 3;
+          TriesDone = 0;
           InstancesMax = 2;
         };
       };
@@ -60,6 +57,11 @@
         };
       };
     };
+
+    systemd.additionalUpstreamSystemUnits = [
+      "systemd-bless-boot.service"
+      "boot-complete.target"
+    ];
 
   };
 

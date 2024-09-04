@@ -10,6 +10,7 @@
 
   updatePackage = test-common.makeUpdatePackage {
     system.image.version = "2";
+    system.image.updates.url = "http://server.test/";
   };
 
 in test-common.makeImageTest {
@@ -33,5 +34,7 @@ in test-common.makeImageTest {
     machine.wait_for_unit("multi-user.target")
 
     machine.succeed('. /etc/os-release; [ "$IMAGE_VERSION" == "2" ]')
+
+    machine.wait_for_unit("systemd-bless-boot.service")
   '';
 }
