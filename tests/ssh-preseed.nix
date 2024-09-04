@@ -26,7 +26,7 @@ in test-common.makeImageTest {
     machine.succeed("chmod 600 privkey.snakeoil")
 
     machine.succeed(
-      "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i privkey.snakeoil root@127.0.0.1 true",
+      "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i privkey.snakeoil admin@127.0.0.1 true",
       timeout=30
     )
   '';
