@@ -40,6 +40,6 @@
     checks."x86_64-linux" = nixpkgs.lib.listToAttrs (map (test: nixpkgs.lib.nameValuePair "${test}" (import ./tests/${test}.nix {
       pkgs = nixpkgs.legacyPackages."x86_64-linux";
       inherit self;
-    })) [ "system-update" "ssh-preseed" ]);
+    })) [ "system-update" "ssh-preseed" "podman" ]);
   };
 }

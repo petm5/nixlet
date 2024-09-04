@@ -28,11 +28,13 @@
     "nft_chain_nat"
     "nft_masq"
     "nfnetlink"
+    "xt_conntrack"
     "nf_conntrack"
     "nf_log_syslog"
     "nf_nat"
     "af_packet"
     "bridge"
+    "veth"
     "tcp_bbr"
     "sch_fq_codel"
     "ipt_rpfilter"
@@ -40,6 +42,11 @@
     "sch_fq"
     "tun"
     "tap"
+    "xt_MASQUERADE"
+    "xt_mark"
+    "xt_comment"
+    "xt_multiport"
+    "xt_addrtype"
   ];
 
 }
