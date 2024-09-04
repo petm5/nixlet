@@ -2,15 +2,12 @@
 
   inherit (pkgs.stdenv.hostPlatform) efiArch;
 
-  defaultSshKeys = pkgs.writeText "ssh-keys" ''
-    ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMjg1Y1b2YyhoC73I4is0/NRmVb3FeRmpLf2Yk8adrxq petms@peter-pc
-  '';
-
 in {
 
   imports = [
     (modulesPath + "/image/repart.nix")
     ./updater.nix
+    ./ssh.nix
   ];
 
   image.repart = {
@@ -23,7 +20,9 @@ in {
             "${pkgs.systemdUkify}/lib/systemd/boot/efi/systemd-boot${efiArch}.efi";
           "/EFI/Linux/${config.system.boot.loader.ukiFile}".source =
             "${config.system.build.uki}/${config.system.boot.loader.ukiFile}";
-          "/default-ssh-authorized-keys.txt".source = "${defaultSshKeys}";
+          "/default-ssh-authorized-keys.txt" = lib.mkIf config.system.image.sshKeys.enable {
+            source = pkgs.writeText "ssh-keys" (lib.concatStringsSep "\n" config.system.image.sshKeys.keys);
+          };
         };
         repartConfig = {
           Type = "esp";
@@ -65,17 +64,6 @@ in {
     cp "${files}"/* .
     ${pkgs.coreutils}/bin/sha256sum * > SHA256SUMS
   '';
-
-  systemd.services."provision-ssh-keys" = lib.mkIf config.services.openssh.enable {
-    script = ''
-      mkdir -p /root/.ssh/
-      cat /efi/default-ssh-authorized-keys.txt >> /root/.ssh/authorized_keys
-    '';
-    wantedBy = [ "sshd.service" "sshd.socket" ];
-    unitConfig = {
-      ConditionPathExists = [ "!/root/.ssh/authorized_keys" "/efi/default-ssh-authorized-keys.txt" ];
-    };
-  };
 
   boot.initrd.systemd.enable = true;
 

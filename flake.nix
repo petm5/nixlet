@@ -37,9 +37,9 @@
       ];
     };
     packages.x86_64-linux.releaseImage = self.nixosConfigurations.release.config.system.build.image;
-    checks."x86_64-linux".system-update = (import ./tests/system-update.nix {
+    checks."x86_64-linux" = nixpkgs.lib.listToAttrs (map (test: nixpkgs.lib.nameValuePair "${test}" (import ./tests/${test}.nix {
       pkgs = nixpkgs.legacyPackages."x86_64-linux";
       inherit self;
-    });
+    })) [ "system-update" "ssh-preseed" ]);
   };
 }

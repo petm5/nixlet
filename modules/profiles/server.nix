@@ -19,6 +19,7 @@
   security.doas.wheelNeedsPassword = false;
 
   services.openssh.enable = true;
+  system.image.sshKeys.enable = true;
 
   virtualisation.podman.enable = true;
 

@@ -21,6 +21,7 @@ in rec {
         users.allowNoPasswordLogin = true;
         system.stateVersion = lib.versions.majorMinor lib.version;
         system.image.id = lib.mkDefault "test";
+        system.image.version = lib.mkDefault "1";
         networking.hosts."10.0.2.1" = [ "server.test" ];
       }
       {
