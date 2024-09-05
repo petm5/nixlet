@@ -7,12 +7,19 @@
     (modulesPath + "/profiles/qemu-guest.nix")
   ];
 
-  # boot.initrd.kernelModules = [ "virtio_net" ];
-
   # system.forbiddenDependenciesRegexes = lib.mkForce [ ];
+
+  boot.kernelModules = [
+    "zram"
+    "usb_storage"
+    "sd_mod"
+    "r8169"
+  ];
 
   system.etc.overlay.mutable = lib.mkDefault false;
   users.mutableUsers = lib.mkDefault false;
+
+  users.allowNoPasswordLogin = true;
 
   programs.nano.enable = false;
 
@@ -34,7 +41,6 @@
   };
 
   zramSwap.enable = true;
-  boot.kernelModules = [ "zram" ];
 
   i18n.supportedLocales = [
     "en_US.UTF-8/UTF-8"
@@ -42,8 +48,8 @@
 
   boot.consoleLogLevel = lib.mkDefault 1;
 
-  systemd.services."getty@tty1".enable = false;
-  systemd.services."autovt@".enable = false;
+  systemd.services."getty@tty1".enable = lib.mkDefault false;
+  systemd.services."autovt@".enable = lib.mkDefault false;
 
   systemd.enableEmergencyMode = false;
 
