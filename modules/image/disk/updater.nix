@@ -47,7 +47,7 @@
         Source = {
           Type = "url-file";
           Path = "${config.system.image.updates.url}";
-          MatchPattern = "${config.system.image.id}_@v.squashfs";
+          MatchPattern = "${config.system.image.id}_@v.store";
         };
         Target = {
           Type = "partition";

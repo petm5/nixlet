@@ -13,7 +13,7 @@ in {
 
   image.repart = {
     split = true;
-    mkfsOptions.squashfs = [ "-comp zstd" "-Xcompression-level 19" "-b 1M" ];
+    mkfsOptions.erofs = [ "-zlz4hc,level=12" "-Efragments,dedupe,ztailpacking" ];
     partitions = {
       "10-esp" = {
         contents = {
@@ -39,9 +39,8 @@ in {
         repartConfig = {
           Type = "usr";
           Minimize = "best";
-          SizeMaxBytes = "256M";
           Label = "store-${config.system.image.version}";
-          Format = "squashfs";
+          Format = "erofs";
           SplitName = "store";
         };
       };
@@ -55,7 +54,7 @@ in {
         path = "${config.system.build.uki}/${config.system.boot.loader.ukiFile}";
       }
       {
-        name = "${config.system.image.id}_${config.system.image.version}.squashfs";
+        name = "${config.system.image.id}_${config.system.image.version}.store";
         path = "${config.system.build.image}/${config.image.repart.imageFileBasename}.store.raw";
       }
     ];
@@ -77,13 +76,13 @@ in {
     };
     "20-store-a" = {
       Type = "usr";
-      SizeMinBytes = "256M";
-      SizeMaxBytes = "256M";
+      SizeMinBytes = "512M";
+      SizeMaxBytes = "512M";
     };
     "21-store-b" = {
       Type = "usr";
-      SizeMinBytes = "256M";
-      SizeMaxBytes = "256M";
+      SizeMinBytes = "512M";
+      SizeMaxBytes = "512M";
       Label = "_empty";
     };
     "30-root" = {
@@ -113,14 +112,14 @@ in {
 
   boot.initrd.supportedFilesystems = {
     btrfs = true;
-    squashfs = true;
+    erofs = true;
   };
 
   boot.initrd.systemd.root = "gpt-auto";
 
   fileSystems."/usr" = {
     device = "PARTLABEL=store-${config.system.image.version}";
-    fsType = "squashfs";
+    fsType = "erofs";
     neededForBoot = true;
   };
 

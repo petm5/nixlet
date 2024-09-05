@@ -16,6 +16,21 @@
     extraGroups = [ "wheel" ];
   };
 
+  # perlless activation doesn't seem to support subuid / subgid yet
+  environment.etc."subuid" = {
+    text = ''
+      admin:100000:65536
+    '';
+    mode = "0644";
+  };
+
+  environment.etc."subgid" = {
+    text = ''
+      admin:100000:65536
+    '';
+    mode = "0644";
+  };
+
   security.doas.wheelNeedsPassword = false;
 
   services.openssh.enable = true;

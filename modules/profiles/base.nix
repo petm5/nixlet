@@ -55,4 +55,7 @@
 
   boot.kernelParams = [ "panic=1" "boot.panic_on_fail" "nomodeset" ];
 
+  programs.vim.enable = true;
+  programs.vim.defaultEditor = lib.mkDefault true;
+
 }
