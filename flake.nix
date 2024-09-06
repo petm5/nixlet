@@ -9,7 +9,7 @@
     };
     relInfo = {
       system.image.id = "nixlet";
-      system.image.version = "2";
+      system.image.version = "3";
       system.image.updates.url = "https://github.com/petm5/nixlet/releases/latest/download/";
     };
   in {

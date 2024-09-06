@@ -64,4 +64,6 @@
   programs.vim.enable = true;
   programs.vim.defaultEditor = lib.mkDefault true;
 
+  services.journald.storage = "volatile";
+
 }
