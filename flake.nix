@@ -7,10 +7,10 @@
     pkgs = import nixpkgs {
       system = "x86_64-linux";
     };
+    baseUpdateUrl = "https://github.com/petm5/nixlet/releases/latest/download";
     relInfo = {
       system.image.id = "nixlet";
       system.image.version = "3";
-      system.image.updates.url = "https://github.com/petm5/nixlet/releases/latest/download/";
     };
   in {
     nixosModules.server = {
@@ -25,7 +25,7 @@
         ./modules/image/disk
       ];
     };
-    nixosConfigurations.release = nixpkgs.lib.nixosSystem {
+    packages.x86_64-linux.nixlet = (nixpkgs.lib.nixosSystem {
       modules = [
         ({ lib, ... }: {
           nixpkgs.hostPlatform = "x86_64-linux";
@@ -33,13 +33,14 @@
         })
         {
           boot.kernelParams = [ "quiet" ];
+          system.image.updates.url = "${baseUpdateUrl}/nixlet";
         }
         self.nixosModules.image
         self.nixosModules.server
         relInfo
       ];
-    };
-    nixosConfigurations.releaseNoTpm = nixpkgs.lib.nixosSystem {
+    }).config.system.build.updatePackage;
+    packages.x86_64-linux.nixletNoTpm = (nixpkgs.lib.nixosSystem {
       modules = [
         ({ lib, ... }: {
           nixpkgs.hostPlatform = "x86_64-linux";
@@ -48,15 +49,14 @@
         })
         {
           boot.kernelParams = [ "quiet" ];
+          system.image.updates.url = "${baseUpdateUrl}/nixlet-no-tpm";
         }
         self.nixosModules.image
         self.nixosModules.server
         relInfo
       ];
-    };
-    packages.x86_64-linux.release = self.nixosConfigurations.release.config.system.build.updatePackage;
-    packages.x86_64-linux.releaseNoTpm = self.nixosConfigurations.releaseNoTpm.config.system.build.updatePackage;
-    checks."x86_64-linux" = nixpkgs.lib.listToAttrs (map (test: nixpkgs.lib.nameValuePair "${test}" (import ./tests/${test}.nix {
+    }).config.system.build.updatePackage;
+    checks.x86_64-linux = nixpkgs.lib.listToAttrs (map (test: nixpkgs.lib.nameValuePair "${test}" (import ./tests/${test}.nix {
       pkgs = nixpkgs.legacyPackages."x86_64-linux";
       inherit self;
     })) [ "system-update" "ssh-preseed" "podman" ]);
