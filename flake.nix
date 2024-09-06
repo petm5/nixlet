@@ -8,10 +8,7 @@
       system = "x86_64-linux";
     };
     baseUpdateUrl = "https://github.com/petm5/nixlet/releases/latest/download";
-    relInfo = {
-      system.image.id = "nixlet";
-      system.image.version = "4.0.0";
-    };
+    releaseVersion = "0.0.4";
   in {
     nixosModules.server = {
       imports = [
@@ -25,6 +22,7 @@
         ./modules/image/disk
       ];
     };
+    version = releaseVersion;
     packages.x86_64-linux.nixlet = (nixpkgs.lib.nixosSystem {
       modules = [
         ({ lib, ... }: {
@@ -34,10 +32,11 @@
         {
           boot.kernelParams = [ "quiet" ];
           system.image.updates.url = "${baseUpdateUrl}/nixlet";
+          system.image.id = "nixlet";
+          system.image.version = releaseVersion;
         }
         self.nixosModules.image
         self.nixosModules.server
-        relInfo
       ];
     }).config.system.build.updatePackage;
     packages.x86_64-linux.nixletNoTpm = (nixpkgs.lib.nixosSystem {
@@ -50,10 +49,11 @@
         {
           boot.kernelParams = [ "quiet" ];
           system.image.updates.url = "${baseUpdateUrl}/nixlet-no-tpm";
+          system.image.id = "nixlet";
+          system.image.version = releaseVersion;
         }
         self.nixosModules.image
         self.nixosModules.server
-        relInfo
       ];
     }).config.system.build.updatePackage;
     checks.x86_64-linux = nixpkgs.lib.listToAttrs (map (test: nixpkgs.lib.nameValuePair "${test}" (import ./tests/${test}.nix {
