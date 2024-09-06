@@ -14,6 +14,11 @@
     "usb_storage"
     "sd_mod"
     "r8169"
+    "ehci-hcd"
+    "ehci-pci"
+    "xhci-hcd"
+    "xhci-pci"
+    "xhci-pci-renesas"
   ];
 
   system.etc.overlay.mutable = lib.mkDefault false;

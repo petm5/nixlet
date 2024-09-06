@@ -9,7 +9,7 @@
     };
     relInfo = {
       system.image.id = "nixos-image";
-      system.image.version = "1";
+      system.image.version = "2";
       system.image.updates.url = "https://github.com/petm5/nixlet/releases/latest/download/";
     };
   in {
