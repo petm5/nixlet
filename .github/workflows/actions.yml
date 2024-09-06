@@ -23,6 +23,7 @@ jobs:
     - run: nix build .#nixlet -o nixlet
     - run: nix build .#nixlet-no-tpm -o nixlet-no-tpm
     - uses: ncipollo/release-action@v1.14.0
-      artifacts:
-        - nixlet
-        - nixlet-no-tpm
+      with:
+        artifacts:
+          - nixlet
+          - nixlet-no-tpm
