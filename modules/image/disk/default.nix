@@ -57,6 +57,10 @@ in {
         name = "${config.system.image.id}_${config.system.image.version}.store";
         path = "${config.system.build.image}/${config.image.repart.imageFileBasename}.store.raw";
       }
+      {
+        name = "${config.system.image.id}_${config.system.image.version}.img";
+        path = "${config.system.build.image}/${config.image.repart.imageFileBasename}.raw";
+      }
     ];
   in pkgs.runCommand "update-package" {} ''
     mkdir $out
