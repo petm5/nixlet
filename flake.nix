@@ -10,7 +10,7 @@
     baseUpdateUrl = "https://github.com/petm5/nixlet/releases/latest/download";
     relInfo = {
       system.image.id = "nixlet";
-      system.image.version = "3";
+      system.image.version = "4.0.0";
     };
   in {
     nixosModules.server = {
