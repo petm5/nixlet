@@ -17,8 +17,7 @@ jobs:
       with:
         nix_path: nixpkgs=channel:nixos-unstable
     - uses: DeterminateSystems/magic-nix-cache-action@v2
-    - run: nix build .#nixlet -o nixlet
-    - run: nix build .#nixletNoTpm -o nixlet-no-tpm
+    - run: nix build .#nixlet
     - uses: ncipollo/release-action@v1.14.0
       with:
-        artifacts: "nixlet/,nixlet-no-tpm/"
+        artifacts: "result/*"
