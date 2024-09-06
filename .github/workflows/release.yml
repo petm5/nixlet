@@ -1,6 +1,9 @@
 name: "Releases"
 
-on: push
+on:
+  push:
+    tags:
+    - '*'
 
 jobs:
 
@@ -16,13 +19,6 @@ jobs:
     - uses: DeterminateSystems/magic-nix-cache-action@v2
     - run: nix build .#nixlet -o nixlet
     - run: nix build .#nixletNoTpm -o nixlet-no-tpm
-    - name: Set release version
-      id: vars
-      run: |
-        version=$(nix eval .#version)
-        echo "APP_VERSION=$version" >> $GITHUB_ENV
     - uses: ncipollo/release-action@v1.14.0
       with:
-        tag: "${{ env.VERSION }}"
-        commit: main
         artifacts: "nixlet,nixlet-no-tpm"
