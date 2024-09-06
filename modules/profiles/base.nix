@@ -37,6 +37,7 @@
 
   environment.systemPackages = with pkgs; [
     (lib.mkIf config.security.doas.enable doas-sudo-shim)
+    iotop
   ];
 
   services.openssh.settings.PasswordAuthentication = lib.mkDefault false;
