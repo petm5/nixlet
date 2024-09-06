@@ -19,6 +19,7 @@
     "xhci-hcd"
     "xhci-pci"
     "xhci-pci-renesas"
+    "nvme"
   ];
 
   system.etc.overlay.mutable = lib.mkDefault false;

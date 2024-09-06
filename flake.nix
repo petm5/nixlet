@@ -8,7 +8,7 @@
       system = "x86_64-linux";
     };
     relInfo = {
-      system.image.id = "nixos-image";
+      system.image.id = "nixlet";
       system.image.version = "2";
       system.image.updates.url = "https://github.com/petm5/nixlet/releases/latest/download/";
     };
