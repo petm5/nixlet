@@ -1,6 +1,8 @@
 name: "Integration Tests"
 on:
-  push
+  push:
+    branches:
+      - "dev"
 jobs:
   check:
     runs-on: ubuntu-latest
