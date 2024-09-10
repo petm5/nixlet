@@ -8,7 +8,6 @@ in {
     (modulesPath + "/image/repart.nix")
     ./updater.nix
     ./ssh.nix
-    ./encrypt.nix
   ];
 
   image.repart = {
@@ -33,15 +32,15 @@ in {
           SplitName = "-";
         };
       };
-      "20-store-a" = {
+      "20-root-a" = {
         storePaths = [ config.system.build.toplevel ];
-        stripNixStorePrefix = true;
         repartConfig = {
-          Type = "usr";
+          Type = "root";
           Minimize = "best";
-          Label = "store-${config.system.image.version}";
+          Label = "root-${config.system.image.version}";
           Format = "erofs";
-          SplitName = "store";
+          SplitName = "root";
+          MakeDirectories = "/home /root /etc /dev /sys /bin /var /proc /run /usr /srv /tmp /mnt /lib /efi";
         };
       };
     };
@@ -54,8 +53,8 @@ in {
         path = "${config.system.build.uki}/${config.system.boot.loader.ukiFile}";
       }
       {
-        name = "${config.system.image.id}_${config.system.image.version}.store";
-        path = "${config.system.build.image}/${config.image.repart.imageFileBasename}.store.raw";
+        name = "${config.system.image.id}_${config.system.image.version}.root";
+        path = "${config.system.build.image}/${config.image.repart.imageFileBasename}.root.raw";
       }
       {
         name = "${config.system.image.id}_${config.system.image.version}.img";
@@ -78,32 +77,28 @@ in {
       Format = "vfat";
       SizeMinBytes = "96M";
     };
-    "20-store-a" = {
-      Type = "usr";
+    "20-root-a" = {
+      Type = "root";
       SizeMinBytes = "512M";
       SizeMaxBytes = "512M";
     };
-    "21-store-b" = {
-      Type = "usr";
+    "21-root-b" = {
+      Type = "root";
       SizeMinBytes = "512M";
       SizeMaxBytes = "512M";
       Label = "_empty";
     };
-    "30-root" = {
-      Type = "root";
-      Format = "btrfs";
-      SizeMinBytes = "512M";
-      SizeMaxBytes = "512M";
-      Encrypt = lib.mkIf config.system.image.encrypt "tpm2";
-    };
-    "40-home" = {
+    "30-home" = {
       Type = "home";
       Format = "btrfs";
-      Encrypt = lib.mkIf config.system.image.encrypt "tpm2";
+      SizeMinBytes = "512M";
+      Encrypt = "tpm2";
     };
   };
 
-  boot.initrd.systemd.services.systemd-repart.after = lib.mkForce [ "sysusr-usr.mount" ];
+  # Should already be set by nixpkgs
+  # boot.initrd.systemd.services.systemd-repart.after = lib.mkForce [ "sysroot.mount" ];
+  # boot.initrd.systemd.services.systemd-repart.requires = [ "sysroot.mount" ];
 
   boot.initrd.compressor = "zstd";
   boot.initrd.compressorArgs = [ "-6" ];
@@ -111,6 +106,7 @@ in {
   boot.loader.grub.enable = false;
 
   boot.initrd.luks.forceLuksSupportInInitrd = true;
+  boot.initrd.kernelModules = [ "dm-crypt" ];
 
   # system.etc.overlay.mutable = true;
 
@@ -119,21 +115,30 @@ in {
     erofs = true;
   };
 
+  system.etc.overlay.mutable = false;
+  users.mutableUsers = false;
+
   boot.initrd.systemd.root = "gpt-auto";
 
-  fileSystems."/usr" = {
-    device = "PARTLABEL=store-${config.system.image.version}";
-    fsType = "erofs";
-    neededForBoot = true;
+  boot.kernelParams = [ "rootfstype=erofs" "rootflags=ro" ];
+
+  fileSystems."/var" = {
+    fsType = "tmpfs";
+    options = [ "mode=0755" ];
   };
 
-  fileSystems."/nix/store" = {
-    device = "/usr";
-    fsType = "none";
-    options = [ "bind" ];
-    neededForBoot = true;
-  };
-
+  # Required to mount the efi partition
   boot.kernelModules = [ "vfat" "nls_cp437" "nls_iso8859-1" ];
+
+  # Store SSH host keys on /home since /etc is read-only
+  services.openssh.hostKeys = [{
+    path = "/home/.ssh/ssh_host_ed25519_key";
+    type = "ed25519";
+  }];
+
+  environment.etc."machine-id" = {
+    text = "";
+    mode = "0755";
+  };
 
 }

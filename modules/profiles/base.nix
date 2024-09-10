@@ -12,6 +12,7 @@
   boot.kernelModules = [
     "zram"
     "usb_storage"
+    "uas"
     "sd_mod"
     "r8169"
     "ehci-hcd"
@@ -66,5 +67,10 @@
   programs.vim.defaultEditor = lib.mkDefault true;
 
   services.journald.storage = "volatile";
+
+  console.enable = false;
+
+  networking.useNetworkd = true;
+  systemd.network.wait-online.enable = lib.mkDefault false;
 
 }

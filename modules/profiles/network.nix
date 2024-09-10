@@ -10,8 +10,8 @@
   networking.nftables.enable = lib.mkDefault true;
 
   # Use systemd-networkd
-  networking.useNetworkd = lib.mkDefault true;
-  systemd.network.wait-online.enable = lib.mkDefault false;
+  networking.useNetworkd = true;
+  systemd.network.wait-online.enable = true;
 
   # Explicitly load networking modules
   boot.kernelModules = [

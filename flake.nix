@@ -8,7 +8,7 @@
       system = "x86_64-linux";
     };
     updateUrl = "https://github.com/petm5/nixlet/releases/latest/download";
-    releaseVersion = "0.0.4";
+    releaseVersion = "0.1.0";
   in {
     nixosModules.server = {
       imports = [
@@ -29,7 +29,7 @@
           system.stateVersion = "24.05";
         })
         {
-          boot.kernelParams = [ "quiet" ];
+          boot.kernelParams = [ "console=ttyS0" "systemd.journald.forward_to_console" ];
           system.image.updates.url = "${updateUrl}";
           system.image.id = "nixlet";
           system.image.version = releaseVersion;

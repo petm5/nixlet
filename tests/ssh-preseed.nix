@@ -18,6 +18,9 @@ in test-common.makeImageTest {
 
     machine.wait_for_unit("multi-user.target")
 
+    machine.succeed("[ -e /efi/default-ssh-authorized-keys.txt ]")
+    machine.succeed("[ -e /home/admin/.ssh/authorized_keys ]")
+
     machine.wait_for_open_port(22)
 
     machine.succeed(

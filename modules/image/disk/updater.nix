@@ -47,13 +47,13 @@
         Source = {
           Type = "url-file";
           Path = "${config.system.image.updates.url}";
-          MatchPattern = "${config.system.image.id}_@v.store";
+          MatchPattern = "${config.system.image.id}_@v.root";
         };
         Target = {
           Type = "partition";
           Path = "auto";
-          MatchPattern = "store-@v";
-          MatchPartitionType = "usr";
+          MatchPattern = "root-@v";
+          MatchPartitionType = "root";
         };
       };
     };

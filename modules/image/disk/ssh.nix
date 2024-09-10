@@ -8,13 +8,13 @@
     };
   };
 
-  config = {
+  config = lib.mkIf config.system.image.sshKeys.enable {
 
     assertions = [
       { assertion = config.services.openssh.enable; message = "OpenSSH must be enabled to preseed authorized keys"; }
     ];
 
-    systemd.services."default-ssh-keys" = lib.mkIf config.system.image.sshKeys.enable {
+    systemd.services."default-ssh-keys" = {
       script = ''
         mkdir -p /home/admin/.ssh/
         cat /efi/default-ssh-authorized-keys.txt >> /home/admin/.ssh/authorized_keys

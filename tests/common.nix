@@ -27,6 +27,7 @@ in rec {
       {
         boot.kernelParams = [ "console=ttyS0,115200n8" "systemd.journald.forward_to_console=1" ];
         image.repart.mkfsOptions.squashfs = lib.mkForce [ "-comp zstd" "-Xcompression-level 6" "-b 256K" ];
+        image.repart.mkfsOptions.erofs = lib.mkForce [ ];
         boot.initrd.compressor = lib.mkForce "zstd";
         boot.initrd.compressorArgs = lib.mkForce [ "-8" ];
       }

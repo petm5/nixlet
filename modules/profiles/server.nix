@@ -7,7 +7,7 @@
 
   boot.kernel.minimalModules = true;
 
-  system.etc.overlay.mutable = true;
+  # system.etc.overlay.mutable = true;
   # users.mutableUsers = true;
 
   users.users."admin" = {

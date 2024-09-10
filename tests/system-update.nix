@@ -6,6 +6,11 @@
   initialImage = test-common.makeImage {
     system.image.version = "1";
     system.image.updates.url = "http://server.test/";
+    # The default root-b is too small for uncompressed test images
+    systemd.repart.partitions."21-root-b" = {
+      SizeMinBytes = lib.mkForce "1G";
+      SizeMaxBytes = lib.mkForce "1G";
+    };
   };
 
   updatePackage = test-common.makeUpdatePackage {
@@ -22,7 +27,7 @@ in test-common.makeImageTest {
     machine.start()
 
     machine.wait_for_unit("multi-user.target")
-    machine.wait_for_unit("network.target")
+    machine.wait_for_unit("network-online.target")
 
     machine.succeed("/run/current-system/sw/lib/systemd/systemd-sysupdate update")
 
