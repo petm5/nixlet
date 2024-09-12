@@ -1,70 +1,16 @@
-{ config, lib, pkgs, modulesPath, ... }: let
-
-  inherit (pkgs.stdenv.hostPlatform) efiArch;
-
-in {
+{ config, lib, pkgs, modulesPath, ... }: {
 
   imports = [
-    (modulesPath + "/image/repart.nix")
     ./updater.nix
     ./ssh.nix
+    ./builder.nix
+    ./veritysetup.nix
   ];
 
-  image.repart = {
-    split = true;
-    mkfsOptions.erofs = [ "-zlz4hc,level=12" "-Efragments,dedupe,ztailpacking" ];
-    partitions = {
-      "10-esp" = {
-        contents = {
-          "/EFI/BOOT/BOOT${lib.toUpper efiArch}.EFI".source =
-            "${pkgs.systemdUkify}/lib/systemd/boot/efi/systemd-boot${efiArch}.efi";
-          "/EFI/Linux/${config.system.boot.loader.ukiFile}".source =
-            "${config.system.build.uki}/${config.system.boot.loader.ukiFile}";
-          "/default-ssh-authorized-keys.txt" = lib.mkIf config.system.image.sshKeys.enable {
-            source = pkgs.writeText "ssh-keys" (lib.concatStringsSep "\n" config.system.image.sshKeys.keys);
-          };
-        };
-        repartConfig = {
-          Type = "esp";
-          Format = "vfat";
-          SizeMinBytes = "96M";
-          SizeMaxBytes = "96M";
-          SplitName = "-";
-        };
-      };
-      "20-root-a" = {
-        storePaths = [ config.system.build.toplevel ];
-        repartConfig = {
-          Type = "root";
-          Minimize = "best";
-          Label = "root-${config.system.image.version}";
-          Format = "erofs";
-          SplitName = "root";
-          MakeDirectories = "/home /root /etc /dev /sys /bin /var /proc /run /usr /srv /tmp /mnt /lib /efi";
-        };
-      };
-    };
-  };
-
-  system.build.updatePackage = let
-    files = pkgs.linkFarm "update-files" [
-      {
-        name = "${config.system.image.id}_${config.system.image.version}.efi";
-        path = "${config.system.build.uki}/${config.system.boot.loader.ukiFile}";
-      }
-      {
-        name = "${config.system.image.id}_${config.system.image.version}.root";
-        path = "${config.system.build.image}/${config.image.repart.imageFileBasename}.root.raw";
-      }
-      {
-        name = "${config.system.image.id}_${config.system.image.version}.img";
-        path = "${config.system.build.image}/${config.image.repart.imageFileBasename}.raw";
-      }
-    ];
-  in pkgs.runCommand "update-package" {} ''
+  system.build.updatePackage = pkgs.runCommand "update-package" {} ''
     mkdir $out
     cd $out
-    cp "${files}"/* .
+    cp "${config.system.build.image}"/* .
     ${pkgs.coreutils}/bin/sha256sum * > SHA256SUMS
   '';
 
@@ -76,29 +22,39 @@ in {
       Type = "esp";
       Format = "vfat";
       SizeMinBytes = "96M";
+      SizeMaxBytes = "96M";
     };
-    "20-root-a" = {
+    "20-root-verity-a" = {
+      Type = "root-verity";
+      SizeMinBytes = "64M";
+      SizeMaxBytes = "64M";
+    };
+    "22-root-a" = {
       Type = "root";
       SizeMinBytes = "512M";
       SizeMaxBytes = "512M";
     };
-    "21-root-b" = {
+    "30-root-verity-b" = {
+      Type = "root-verity";
+      SizeMinBytes = "64M";
+      SizeMaxBytes = "64M";
+      Label = "_empty";
+      ReadOnly = 1;
+    };
+    "32-root-b" = {
       Type = "root";
       SizeMinBytes = "512M";
       SizeMaxBytes = "512M";
       Label = "_empty";
+      ReadOnly = 1;
     };
-    "30-home" = {
+    "40-home" = {
       Type = "home";
       Format = "btrfs";
       SizeMinBytes = "512M";
       Encrypt = "tpm2";
     };
   };
-
-  # Should already be set by nixpkgs
-  # boot.initrd.systemd.services.systemd-repart.after = lib.mkForce [ "sysroot.mount" ];
-  # boot.initrd.systemd.services.systemd-repart.requires = [ "sysroot.mount" ];
 
   boot.initrd.compressor = "zstd";
   boot.initrd.compressorArgs = [ "-6" ];
@@ -108,8 +64,6 @@ in {
   boot.initrd.luks.forceLuksSupportInInitrd = true;
   boot.initrd.kernelModules = [ "dm-crypt" ];
 
-  # system.etc.overlay.mutable = true;
-
   boot.initrd.supportedFilesystems = {
     btrfs = true;
     erofs = true;
@@ -118,9 +72,10 @@ in {
   system.etc.overlay.mutable = false;
   users.mutableUsers = false;
 
-  boot.initrd.systemd.root = "gpt-auto";
+  boot.initrd.systemd.services.systemd-repart.after = lib.mkForce [ "sysroot.mount" ];
+  boot.initrd.systemd.services.systemd-repart.requires = [ "sysroot.mount" ];
 
-  boot.kernelParams = [ "rootfstype=erofs" "rootflags=ro" ];
+  boot.kernelParams = [ "rootfstype=erofs" "rootflags=ro" "roothash=${config.system.build.verityRootHash}" ];
 
   fileSystems."/var" = {
     fsType = "tmpfs";
@@ -140,5 +95,19 @@ in {
     text = "";
     mode = "0755";
   };
+
+  # boot.initrd.systemd.storePaths = [ "${pkgs.strace}/bin/strace" ];
+
+  # boot.initrd.systemd.services.systemd-repart.serviceConfig.ExecStart = lib.mkForce [
+  #   " "
+  #   ''${pkgs.strace}/bin/strace ${config.boot.initrd.systemd.package}/bin/systemd-repart \
+  #       --definitions=/etc/repart.d \
+  #       --dry-run=no
+  #   ''
+  # ];
+  
+  boot.initrd.systemd.services.systemd-repart.serviceConfig.Environment = [
+    "SYSTEMD_LOG_LEVEL=debug"
+  ];
 
 }

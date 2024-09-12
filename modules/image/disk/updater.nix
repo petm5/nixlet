@@ -40,20 +40,38 @@
           InstancesMax = 2;
         };
       };
-      "20-root" = {
+      "20-root-verity" = {
         Transfer = {
           Verify = "no";
         };
         Source = {
           Type = "url-file";
           Path = "${config.system.image.updates.url}";
-          MatchPattern = "${config.system.image.id}_@v.root";
+          MatchPattern = "${config.system.image.id}_@v_@u.verity";
+        };
+        Target = {
+          Type = "partition";
+          Path = "auto";
+          MatchPattern = "verity-@v";
+          MatchPartitionType = "root-verity";
+          ReadOnly = 1;
+        };
+      };
+      "22-root" = {
+        Transfer = {
+          Verify = "no";
+        };
+        Source = {
+          Type = "url-file";
+          Path = "${config.system.image.updates.url}";
+          MatchPattern = "${config.system.image.id}_@v_@u.root";
         };
         Target = {
           Type = "partition";
           Path = "auto";
           MatchPattern = "root-@v";
           MatchPartitionType = "root";
+          ReadOnly = 1;
         };
       };
     };

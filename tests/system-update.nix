@@ -7,7 +7,7 @@
     system.image.version = "1";
     system.image.updates.url = "http://server.test/";
     # The default root-b is too small for uncompressed test images
-    systemd.repart.partitions."21-root-b" = {
+    systemd.repart.partitions."32-root-b" = {
       SizeMinBytes = lib.mkForce "1G";
       SizeMaxBytes = lib.mkForce "1G";
     };

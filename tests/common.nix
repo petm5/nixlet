@@ -26,8 +26,7 @@ in rec {
       }
       {
         boot.kernelParams = [ "console=ttyS0,115200n8" "systemd.journald.forward_to_console=1" ];
-        image.repart.mkfsOptions.squashfs = lib.mkForce [ "-comp zstd" "-Xcompression-level 6" "-b 256K" ];
-        image.repart.mkfsOptions.erofs = lib.mkForce [ ];
+        image.compress = false;
         boot.initrd.compressor = lib.mkForce "zstd";
         boot.initrd.compressorArgs = lib.mkForce [ "-8" ];
       }
@@ -40,7 +39,7 @@ in rec {
 
   makeImage = extraConfig: let
     system = makeSystem extraConfig;
-  in "${system.config.system.build.image}/${system.config.image.repart.imageFile}";
+  in "${system.config.system.build.image}/${system.config.system.build.image.imageFile}";
 
   makeUpdatePackage = extraConfig: let
     system = makeSystem extraConfig;
