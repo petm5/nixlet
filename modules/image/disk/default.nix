@@ -62,7 +62,7 @@
   boot.loader.grub.enable = false;
 
   boot.initrd.luks.forceLuksSupportInInitrd = true;
-  boot.initrd.kernelModules = [ "dm-crypt" ];
+  boot.initrd.kernelModules = [ "dm_mod" "dm_crypt" ] ++ config.boot.initrd.luks.cryptoModules;
 
   boot.initrd.supportedFilesystems = {
     btrfs = true;
@@ -99,5 +99,11 @@
   boot.initrd.systemd.services.systemd-repart.serviceConfig.Environment = [
     "SYSTEMD_REPART_MKFS_OPTIONS_BTRFS=--nodiscard"
   ];
+
+  # Refuse to boot on mount failure
+  systemd.targets."sysinit".requires = [ "local-fs.target" ];
+
+  # Make sure home gets mounted
+  systemd.targets."local-fs".requires = [ "home.mount" ];
 
 }

@@ -21,6 +21,7 @@
     "xhci-pci"
     "xhci-pci-renesas"
     "nvme"
+    "virtio_net"
   ];
 
   system.etc.overlay.mutable = lib.mkDefault false;
