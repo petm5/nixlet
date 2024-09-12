@@ -95,19 +95,9 @@
     text = "";
     mode = "0755";
   };
-
-  # boot.initrd.systemd.storePaths = [ "${pkgs.strace}/bin/strace" ];
-
-  # boot.initrd.systemd.services.systemd-repart.serviceConfig.ExecStart = lib.mkForce [
-  #   " "
-  #   ''${pkgs.strace}/bin/strace ${config.boot.initrd.systemd.package}/bin/systemd-repart \
-  #       --definitions=/etc/repart.d \
-  #       --dry-run=no
-  #   ''
-  # ];
   
   boot.initrd.systemd.services.systemd-repart.serviceConfig.Environment = [
-    "SYSTEMD_LOG_LEVEL=debug"
+    "SYSTEMD_REPART_MKFS_OPTIONS_BTRFS=--nodiscard"
   ];
 
 }
