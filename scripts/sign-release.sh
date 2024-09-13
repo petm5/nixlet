@@ -6,7 +6,8 @@ set -eux
 mkdir signed
 cp -L result/* signed/
 
-loopdev=$(sudo losetup -P -f signed/*.img)
+loopdev=$(sudo losetup -f)
+sudo losetup -P "$loopdev" signed/*.img
 sudo mount "${loopdev}p1" /mnt -t vfat
 
 sudo find signed/ /mnt/ -name "*.efi" -type f -exec sbsign --key <(echo "$DB_KEY") --cert <(echo "$DB_CRT") --output {} {} \;
