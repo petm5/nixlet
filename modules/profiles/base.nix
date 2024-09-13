@@ -9,6 +9,8 @@
 
   # system.forbiddenDependenciesRegexes = lib.mkForce [ ];
 
+  networking.hostName = "nixlet";
+
   boot.kernelModules = [
     "zram"
     "usb_storage"

@@ -57,7 +57,7 @@
   rootUuid = rootAttrs.uuid;
   verityUuid = verityAttrs.uuid;
   verityRootHash = rootAttrs.roothash;
-  
+
   finalPartitions = {
     "10-esp" = {
       contents = {
