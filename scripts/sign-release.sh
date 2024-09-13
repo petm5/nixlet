@@ -6,13 +6,13 @@ set -eux
 mkdir signed
 cp -L result/* signed/
 
-losetup -P /dev/loop0 signed/*.img
-mount /dev/loop0p1 /mnt -t vfat
+sudo losetup -P /dev/loop0 signed/*.img
+sudo mount /dev/loop0p1 /mnt -t vfat
 
-find signed/ /mnt/ -name "*.efi" -type f -exec sbsign --key <(echo "$DB_KEY") --cert <(echo "$DB_CRT") --output {} {} \;
+sudo find signed/ /mnt/ -name "*.efi" -type f -exec sbsign --key <(echo "$DB_KEY") --cert <(echo "$DB_CRT") --output {} {} \;
 
-mkdir -p /mnt/loader/keys/nixlet
-cp keys/*.auth /mnt/loader/keys/nixlet/
+sudo mkdir -p /mnt/loader/keys/nixlet
+sudo cp keys/*.auth /mnt/loader/keys/nixlet/
 
-umount /mnt
-losetup -d /dev/loop0
+sudo umount /mnt
+sudo losetup -d /dev/loop0
