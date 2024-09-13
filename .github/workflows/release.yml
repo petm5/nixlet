@@ -23,7 +23,8 @@ jobs:
       env:
         DB_KEY: ${{ secrets.DBKEY }}
         DB_CRT: ${{ secrets.DBCRT }}
-      run: ./scripts/sign-release.sh
-    - uses: ncipollo/release-action@v1.14.0
+      run: sudo ./scripts/sign-release.sh
+    - name: Release
+      uses: ncipollo/release-action@v1.14.0
       with:
         artifacts: "signed/*"
