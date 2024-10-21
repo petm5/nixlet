@@ -9,6 +9,9 @@
 
   # system.forbiddenDependenciesRegexes = lib.mkForce [ ];
 
+  nixpkgs.flake.setNixPath = false;
+  nixpkgs.flake.setFlakeRegistry = false;
+
   networking.hostName = "nixlet";
 
   boot.kernelModules = [
