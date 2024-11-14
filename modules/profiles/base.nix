@@ -12,7 +12,7 @@
   nixpkgs.flake.setNixPath = false;
   nixpkgs.flake.setFlakeRegistry = false;
 
-  networking.hostName = "nixlet";
+  networking.hostName = "";
 
   boot.kernelModules = [
     "zram"

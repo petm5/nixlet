@@ -95,6 +95,10 @@
     text = "";
     mode = "0755";
   };
+
+  environment.etc."hostname" = {
+    source = "/home/hostname.txt";
+  };
   
   boot.initrd.systemd.services.systemd-repart.serviceConfig.Environment = [
     "SYSTEMD_REPART_MKFS_OPTIONS_BTRFS=--nodiscard"
