@@ -36,7 +36,7 @@
           (modulesPath + "/image/repart.nix")
         ];
         image.repart = {
-          name = "verity";
+          name = "rootfs-${config.system.image.id}";
           split = true;
           mkfsOptions = lib.mkIf config.image.compress {
             erofs = [ "-zlz4hc,level=12" "-Efragments,dedupe,ztailpacking" ];
@@ -111,7 +111,7 @@
           (modulesPath + "/image/repart.nix")
         ];
         image.repart = {
-          name = "${config.system.image.id}";
+          name = "image-${config.system.image.id}";
           partitions = finalPartitions;
         };
       })
