@@ -12,7 +12,7 @@ in test-common.makeImageTest {
     start_tpm()
     machine.start()
 
-    machine.wait_for_unit("multi-user.target")
+    machine.systemctl("start network-online.target")
     machine.wait_for_unit("network-online.target")
 
     machine.succeed("tar cv --files-from /dev/null | su admin -l -c 'podman import - scratchimg'")
