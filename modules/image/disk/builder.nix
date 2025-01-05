@@ -65,6 +65,7 @@
           "${pkgs.systemdUkify}/lib/systemd/boot/efi/systemd-boot${efiArch}.efi";
         "/EFI/Linux/${config.system.boot.loader.ukiFile}".source =
           "${config.system.build.uki}/${config.system.boot.loader.ukiFile}";
+        "/EFI/loader/keys/nixlet".source = ../../../keys;
         "/default-ssh-authorized-keys.txt" = lib.mkIf config.system.image.sshKeys.enable {
           source = pkgs.writeText "ssh-keys" (lib.concatStringsSep "\n" config.system.image.sshKeys.keys);
         };
