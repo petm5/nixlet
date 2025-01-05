@@ -17,11 +17,11 @@
     systemd.services."default-ssh-keys" = {
       script = ''
         mkdir -p /home/admin/.ssh/
-        cat /efi/default-ssh-authorized-keys.txt >> /home/admin/.ssh/authorized_keys
+        cat /boot/default-ssh-authorized-keys.txt >> /home/admin/.ssh/authorized_keys
       '';
       wantedBy = [ "sshd.service" "sshd.socket" ];
       unitConfig = {
-        ConditionPathExists = [ "/home/admin" "!/home/admin/.ssh/authorized_keys" "/efi/default-ssh-authorized-keys.txt" ];
+        ConditionPathExists = [ "/home/admin" "!/home/admin/.ssh/authorized_keys" "/boot/default-ssh-authorized-keys.txt" ];
       };
     };
 

@@ -9,7 +9,7 @@
         Type = "root";
         Minimize = "best";
         Format = "erofs";
-        MakeDirectories = "/home /root /etc /dev /sys /bin /var /proc /run /usr /srv /tmp /mnt /lib /efi";
+        MakeDirectories = "/home /root /etc /dev /sys /bin /var /proc /run /usr /srv /tmp /mnt /lib /boot";
         Verity = "data";
         VerityMatchKey = "root";
         SplitName = "root";
