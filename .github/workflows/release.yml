@@ -12,7 +12,7 @@ jobs:
     permissions:
       contents: write
     steps:
-    - run: sudo apparmor_parser -R /etc/apparmor.d/unprivileged_userns
+    - run: echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns
     - uses: actions/checkout@v4
     - uses: cachix/install-nix-action@v30
       with:
