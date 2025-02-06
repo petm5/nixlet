@@ -3,14 +3,14 @@
 
 set -eux
 
-mkdir signed
-cp -L result/* signed/
+mkdir nixlet-signed
+cp -L nixlet-unsigned/* nixlet-signed/
 
 loopdev=$(sudo losetup -f)
-sudo losetup -P "$loopdev" signed/*.img
+sudo losetup -P "$loopdev" nixlet-signed/*.img
 sudo mount "${loopdev}p1" /mnt -t vfat
 
-sudo find signed/ /mnt/ -name "*.efi" -type f -exec sbsign --key <(echo "$DB_KEY") --cert <(echo "$DB_CRT") --output {} {} \;
+sudo find nixlet-signed/ /mnt/ -name "*.efi" -type f -exec sbsign --key <(echo "$DB_KEY") --cert <(echo "$DB_CRT") --output {} {} \;
 
 sudo mkdir -p /mnt/loader/keys/nixlet
 sudo cp keys/*.auth /mnt/loader/keys/nixlet/

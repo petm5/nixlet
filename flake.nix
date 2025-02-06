@@ -29,10 +29,25 @@
           system.stateVersion = "24.05";
         })
         {
-          boot.kernelParams = [ "console=ttyS0" "systemd.journald.forward_to_console" ];
           system.image.updates.url = "${updateUrl}";
           system.image.id = "nixlet";
           system.image.version = releaseVersion;
+        }
+        self.nixosModules.image
+        self.nixosModules.server
+      ];
+    }).config.system.build.updatePackage;
+    packages.x86_64-linux.nixlet-insecure = (nixpkgs.lib.nixosSystem {
+      modules = [
+        ({ lib, ... }: {
+          nixpkgs.hostPlatform = "x86_64-linux";
+          system.stateVersion = "24.05";
+        })
+        {
+          system.image.updates.url = "${updateUrl}";
+          system.image.id = "nixlet-insecure";
+          system.image.version = releaseVersion;
+          system.image.filesystems.encrypt = false;
         }
         self.nixosModules.image
         self.nixosModules.server

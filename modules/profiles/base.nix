@@ -66,7 +66,11 @@
 
   systemd.enableEmergencyMode = false;
 
-  boot.kernelParams = [ "panic=1" "boot.panic_on_fail" "nomodeset" ];
+  boot.kernelParams = [
+    "panic=1" "boot.panic_on_fail"
+    "console=ttyS0" "console=tty0"
+    "systemd.journald.forward_to_console"
+  ];
 
   programs.vim.enable = true;
   programs.vim.defaultEditor = lib.mkDefault true;

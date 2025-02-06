@@ -19,7 +19,8 @@ jobs:
         nix_path: nixpkgs=channel:nixos-unstable
     - uses: DeterminateSystems/magic-nix-cache-action@v2
     - name: Build
-      run: nix build .#nixlet
+      run: nix build .#nixlet -o nixlet-unsigned
+      run: nix build .#nixlet-insecure -o nixlet-insecure-unsigned
     - name: Sign for Secure Boot
       env:
         DB_KEY: ${{ secrets.DBKEY }}
@@ -28,4 +29,4 @@ jobs:
     - name: Release
       uses: ncipollo/release-action@v1.14.0
       with:
-        artifacts: "signed/*"
+        artifacts: "nixlet-signed/*,nixlet-insecure-unsigned/*"
