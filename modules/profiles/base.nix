@@ -30,7 +30,6 @@
   ];
 
   system.etc.overlay.mutable = lib.mkDefault false;
-  users.mutableUsers = lib.mkDefault false;
 
   users.allowNoPasswordLogin = true;
 

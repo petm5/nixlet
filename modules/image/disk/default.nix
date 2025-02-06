@@ -24,34 +24,42 @@
       SizeMinBytes = "96M";
       SizeMaxBytes = "96M";
     };
-    "20-root-verity-a" = {
-      Type = "root-verity";
+    "20-usr-verity-a" = {
+      Type = "usr-verity";
       SizeMinBytes = "64M";
       SizeMaxBytes = "64M";
     };
-    "22-root-a" = {
-      Type = "root";
+    "22-usr-a" = {
+      Type = "usr";
       SizeMinBytes = "512M";
       SizeMaxBytes = "512M";
     };
-    "30-root-verity-b" = {
-      Type = "root-verity";
+    "30-usr-verity-b" = {
+      Type = "usr-verity";
       SizeMinBytes = "64M";
       SizeMaxBytes = "64M";
       Label = "_empty";
       ReadOnly = 1;
     };
-    "32-root-b" = {
-      Type = "root";
+    "32-usr-b" = {
+      Type = "usr";
       SizeMinBytes = "512M";
       SizeMaxBytes = "512M";
       Label = "_empty";
       ReadOnly = 1;
     };
-    "40-home" = {
+    "40-state" = {
+      Type = "root";
+      Format = "btrfs";
+      SizeMinBytes = "16M";
+      SizeMaxBytes = "512M";
+      Encrypt = "tpm2";
+      MakeDirectories = "/usr /etc /root /srv /var";
+    };
+    "50-home" = {
       Type = "home";
       Format = "btrfs";
-      SizeMinBytes = "512M";
+      SizeMinBytes = "16M";
       Encrypt = "tpm2";
     };
   };
@@ -69,45 +77,46 @@
     erofs = true;
   };
 
-  system.etc.overlay.mutable = false;
-  users.mutableUsers = false;
+  system.etc.overlay.mutable = true;
 
-  boot.initrd.systemd.services.systemd-repart.after = lib.mkForce [ "sysroot.mount" ];
-  boot.initrd.systemd.services.systemd-repart.requires = [ "sysroot.mount" ];
+  services.userborn.enable = false;
+  systemd.sysusers.enable = true;
 
-  boot.kernelParams = [ "rootfstype=erofs" "rootflags=ro" "roothash=${config.system.build.verityRootHash}" ];
+  boot.initrd.systemd.services.systemd-repart.after = lib.mkForce [ ];
 
-  fileSystems."/var" = {
-    fsType = "tmpfs";
-    options = [ "mode=0755" ];
+  boot.kernelParams = [ "rootfstype=btrfs" "rootflags=rw" "mount.usrfstype=erofs" "mount.usrflags=ro" "usrhash=${config.system.build.verityUsrHash}" ];
+
+  fileSystems."/nix/store" = {
+    device = "/usr";
+    options = [ "bind" ];
   };
+
+  boot.initrd.systemd.root = "gpt-auto";
+
+  boot.initrd.systemd.additionalUpstreamUnits = [ "initrd-usr-fs.target" ];
 
   # Required to mount the efi partition
   boot.kernelModules = [ "vfat" "nls_cp437" "nls_iso8859-1" ];
 
-  # Store SSH host keys on /home since /etc is read-only
-  services.openssh.hostKeys = [{
-    path = "/home/.ssh/ssh_host_ed25519_key";
-    type = "ed25519";
-  }];
-
-  environment.etc."machine-id" = {
-    text = "";
-    mode = "0755";
-  };
-
-  environment.etc."hostname" = {
-    source = "/home/hostname.txt";
-  };
-  
   boot.initrd.systemd.services.systemd-repart.serviceConfig.Environment = [
     "SYSTEMD_REPART_MKFS_OPTIONS_BTRFS=--nodiscard"
   ];
 
-  # Refuse to boot on mount failure
-  systemd.targets."sysinit".requires = [ "local-fs.target" ];
+  boot.initrd.systemd.services.systemd-repart.serviceConfig.ExecStart = lib.mkForce [
+    " "
+    ''
+      ${config.boot.initrd.systemd.package}/bin/systemd-repart \
+                        --definitions=/etc/repart.d \
+                        --dry-run=no
+                        --tpm2-pcrs=3,7,13
+    ''
+  ];
 
-  # Make sure home gets mounted
-  systemd.targets."local-fs".requires = [ "home.mount" ];
+  services.openssh.hostKeys = [
+    {
+      path = "/etc/ssh/ssh_host_ed25519_key";
+      type = "ed25519";
+    }
+  ];
 
 }

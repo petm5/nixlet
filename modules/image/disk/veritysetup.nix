@@ -1,10 +1,6 @@
 { config, lib, ... }: {
 
-  options.boot.initrd.systemd.root = lib.mkOption {
-    type = lib.types.enum [ "fstab" "gpt-auto" "" ];
-  };
-
-  config.boot.initrd = {
+  boot.initrd = {
 
     kernelModules = [
       "dm_mod"
@@ -12,9 +8,6 @@
     ];
 
    systemd = {
-
-      # Required to activate systemd-fstab-generator
-      root = "";
 
       additionalUpstreamUnits = [
         "veritysetup-pre.target"

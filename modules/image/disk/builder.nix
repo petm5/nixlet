@@ -3,24 +3,24 @@
   inherit (pkgs.stdenv.hostPlatform) efiArch;
 
   initialPartitions = {
-    "10-root" = {
+    "10-usr" = {
       storePaths = [ config.system.build.toplevel ];
+      stripNixStorePrefix = true;
       repartConfig = {
-        Type = "root";
+        Type = "usr";
         Minimize = "best";
         Format = "erofs";
-        MakeDirectories = "/home /root /etc /dev /sys /bin /var /proc /run /usr /srv /tmp /mnt /lib /boot";
         Verity = "data";
-        VerityMatchKey = "root";
-        SplitName = "root";
+        VerityMatchKey = "usr";
+        SplitName = "usr";
       };
     };
-    "20-root-verity" = {
+    "20-usr-verity" = {
       repartConfig = {
-        Type = "root-verity";
+        Type = "usr-verity";
         Minimize = "best";
         Verity = "hash";
-        VerityMatchKey = "root";
+        VerityMatchKey = "usr";
         SplitName = "verity";
       };
     };
@@ -36,7 +36,7 @@
           (modulesPath + "/image/repart.nix")
         ];
         image.repart = {
-          name = "rootfs-${config.system.image.id}";
+          name = "usr-${config.system.image.id}";
           split = true;
           mkfsOptions = lib.mkIf config.image.compress {
             erofs = [ "-zlz4hc,level=12" "-Efragments,dedupe,ztailpacking" ];
@@ -47,16 +47,16 @@
     ];
   };
 
-  rootPart = "${verityRepart.config.system.build.image}/${verityRepart.config.image.repart.imageFileBasename}.root.raw";
+  usrPart = "${verityRepart.config.system.build.image}/${verityRepart.config.image.repart.imageFileBasename}.usr.raw";
   verityPart = "${verityRepart.config.system.build.image}/${verityRepart.config.image.repart.imageFileBasename}.verity.raw";
 
   verityImgAttrs = builtins.fromJSON (builtins.readFile "${verityRepart.config.system.build.image}/repart-output.json");
-  rootAttrs = builtins.elemAt verityImgAttrs 0;
+  usrAttrs = builtins.elemAt verityImgAttrs 0;
   verityAttrs = builtins.elemAt verityImgAttrs 1;
 
-  rootUuid = rootAttrs.uuid;
+  usrUuid = usrAttrs.uuid;
   verityUuid = verityAttrs.uuid;
-  verityRootHash = rootAttrs.roothash;
+  verityUsrHash = usrAttrs.roothash;
 
   finalPartitions = {
     "10-esp" = {
@@ -78,9 +78,9 @@
         SplitName = "-";
       };
     };
-    "20-root-verity-a" = {
+    "20-usr-verity-a" = {
       repartConfig = {
-        Type = "root-verity";
+        Type = "usr-verity";
         Label = "verity-${config.system.image.version}";
         CopyBlocks = "${verityPart}";
         SplitName = "-";
@@ -91,13 +91,13 @@
       };
     };
     # TODO: Add signature partition for systemd-nspawn
-    "22-root-a" = {
+    "22-usr-a" = {
       repartConfig = {
-        Type = "root";
-        Label = "root-${config.system.image.version}";
-        CopyBlocks = "${rootPart}";
+        Type = "usr";
+        Label = "usr-${config.system.image.version}";
+        CopyBlocks = "${usrPart}";
         SplitName = "-";
-        UUID = "${rootUuid}";
+        UUID = "${usrUuid}";
         ReadOnly = 1;
       };
     };
@@ -127,7 +127,7 @@ in {
 
   config.system.build = {
 
-    inherit verityRootHash;
+    inherit verityUsrHash;
 
     image = (pkgs.linkFarm "image-release" [
       {
@@ -139,8 +139,8 @@ in {
         path = "${verityRepart.config.system.build.image}/${verityRepart.config.image.repart.imageFileBasename}.verity.raw";
       }
       {
-        name = "${config.system.image.id}_${config.system.image.version}_${rootUuid}.root";
-        path = "${verityRepart.config.system.build.image}/${verityRepart.config.image.repart.imageFileBasename}.root.raw";
+        name = "${config.system.image.id}_${config.system.image.version}_${usrUuid}.usr";
+        path = "${verityRepart.config.system.build.image}/${verityRepart.config.image.repart.imageFileBasename}.usr.raw";
       }
       {
         name = "${config.system.image.id}_${config.system.image.version}.img";

@@ -15,9 +15,6 @@ in rec {
     system = null;
     modules = [
       {
-        nixpkgs.hostPlatform = pkgs.hostPlatform;
-      }
-      {
         users.allowNoPasswordLogin = true;
         system.stateVersion = lib.versions.majorMinor lib.version;
         system.image.id = lib.mkDefault "test";
@@ -25,7 +22,7 @@ in rec {
         networking.hosts."10.0.2.1" = [ "server.test" ];
       }
       {
-        boot.kernelParams = [ "console=ttyS0,115200n8" "systemd.journald.forward_to_console=1" ];
+        boot.kernelParams = [ "x-systemd.device-timeout=10s" ];
         image.compress = false;
         boot.initrd.compressor = lib.mkForce "zstd";
         boot.initrd.compressorArgs = lib.mkForce [ "-8" ];

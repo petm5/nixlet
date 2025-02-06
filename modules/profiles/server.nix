@@ -7,30 +7,7 @@
 
   boot.kernel.minimalModules = true;
 
-  # system.etc.overlay.mutable = true;
-  # users.mutableUsers = true;
-
-  users.users."admin" = {
-    isNormalUser = true;
-    linger = true;
-    extraGroups = [ "wheel" ];
-  };
-
-  # perlless activation doesn't seem to support subuid / subgid yet
-  environment.etc."subuid" = {
-    text = ''
-      admin:100000:65536
-    '';
-    mode = "0644";
-  };
-
-  environment.etc."subgid" = {
-    text = ''
-      admin:100000:65536
-    '';
-    mode = "0644";
-  };
-
+  users.mutableUsers = lib.mkForce true;
   security.doas.wheelNeedsPassword = false;
 
   services.openssh.enable = true;
