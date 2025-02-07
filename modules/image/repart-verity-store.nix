@@ -12,8 +12,17 @@
 
 in {
 
-  options.image.compress = lib.mkEnableOption "image compression" // {
-    default = true;
+  options.system.image = {
+    compress = lib.mkEnableOption "image compression" // {
+      default = true;
+    };
+    sshKeys = {
+      enable = lib.mkEnableOption "provisioning of default SSH keys from ESP";
+      keys = lib.mkOption {
+        type = lib.types.listOf lib.types.singleLineStr;
+        default = [];
+      };
+    };
   };
 
   imports = [
@@ -23,7 +32,7 @@ in {
   config = {
 
     assertions = [
-      { assertion = boot.initrd.systemd.enable; }
+      { assertion = config.boot.initrd.systemd.enable; }
     ];
 
     # systemd-gpt-auto-generator only supports auto-detection of root and usr partitions.
@@ -33,6 +42,10 @@ in {
       systemd.dmVerity.enable = true;
       systemd.additionalUpstreamUnits = [ "initrd-usr-fs.target" ];
       supportedFilesystems.erofs = true;
+
+      # Use stronger compression
+      compressor = lib.mkDefault "zstd";
+      compressorArgs = lib.mkDefault [ "-6" ];
     };
 
     boot.kernelParams = [ "mount.usrfstype=erofs" "mount.usrflags=ro" "usrhash=${config.system.build.verityUsrHash}" ];
@@ -48,9 +61,6 @@ in {
           # Include systemd-boot
           "/EFI/BOOT/BOOT${lib.toUpper efiArch}.EFI".source =
             "${pkgs.systemdUkify}/lib/systemd/boot/efi/systemd-boot${efiArch}.efi";
-
-          # Include nixlet secure boot keys
-          "/EFI/loader/keys/nixlet".source = ../../../keys;
 
           # Include default SSH keys, used in tests
           "/default-ssh-authorized-keys.txt" = lib.mkIf config.system.image.sshKeys.enable {
@@ -93,7 +103,7 @@ in {
       };
     };
 
-    image.repart.mkfsOptions = lib.mkIf config.image.compress {
+    image.repart.mkfsOptions = lib.mkIf config.system.image.compress {
       erofs = [ "-zlz4hc,level=12" "-Efragments,dedupe,ztailpacking" ];
     };
 

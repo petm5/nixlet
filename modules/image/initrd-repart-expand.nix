@@ -10,6 +10,10 @@ in {
 
   config = lib.mkMerge [({
 
+    assertions = [
+      { assertion = config.boot.initrd.systemd.enable; }
+    ];
+
     boot.initrd.systemd.repart.enable = true;
     systemd.repart.partitions = {
       "10-esp" = {
@@ -59,6 +63,8 @@ in {
     };
 
     boot.initrd.systemd.services.systemd-repart.after = lib.mkForce [ ];
+
+    boot.initrd.supportedFilesystems.btrfs = true;
 
     boot.kernelParams = [ "rootfstype=btrfs" "rootflags=rw" ];
 

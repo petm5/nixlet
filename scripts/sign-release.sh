@@ -17,3 +17,7 @@ sudo cp keys/*.auth /mnt/loader/keys/nixlet/
 
 sudo umount /mnt
 sudo losetup -d "$loopdev"
+
+pushd nixlet-signed
+sha256sum * > SHA256SUMS
+popd

@@ -14,22 +14,29 @@ in rec {
     inherit pkgs lib;
     system = null;
     modules = [
+      ../modules/image/repart-verity-store.nix
+      ../modules/image/initrd-repart-expand.nix
+      ../modules/profiles/minimal.nix
+      ../modules/profiles/image-based.nix
+      ../modules/profiles/server.nix
+      (pkgs.path + "/nixos/modules/profiles/qemu-guest.nix")
       {
         users.allowNoPasswordLogin = true;
         system.stateVersion = lib.versions.majorMinor lib.version;
         system.image.id = lib.mkDefault "test";
         system.image.version = lib.mkDefault "1";
         networking.hosts."10.0.2.1" = [ "server.test" ];
-      }
-      {
-        boot.kernelParams = [ "x-systemd.device-timeout=10s" ];
-        image.compress = false;
-        boot.initrd.compressor = lib.mkForce "zstd";
-        boot.initrd.compressorArgs = lib.mkForce [ "-8" ];
+        boot.kernelParams = [
+          "x-systemd.device-timeout=10s"
+          "console=ttyS0,115200n8"
+          "panic=0" "boot.panic_on_fail"
+        ];
+        # Use weak compression
+        system.image.compress = false;
+        boot.initrd.compressor = "zstd";
+        boot.initrd.compressorArgs = [ "-2" ];
       }
       (pkgs.path + "/nixos/modules/testing/test-instrumentation.nix")
-      self.nixosModules.server
-      self.nixosModules.image
       extraConfig
     ];
   };

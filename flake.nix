@@ -9,49 +9,32 @@
     };
     updateUrl = "https://github.com/petm5/nixlet/releases/latest/download";
     releaseVersion = "0.1.5";
+    baseConfig = [
+      ./modules/profiles/minimal.nix
+      ./modules/profiles/image-based.nix
+      ./modules/profiles/headless.nix
+      ./modules/profiles/server.nix
+      ./modules/hardware/generic-pc.nix
+      (nixpkgs + "/nixos/modules/profiles/qemu-guest.nix")
+      ./modules/image/repart-verity-store.nix
+      ./modules/image/initrd-repart-expand.nix
+      ./modules/image/sysupdate-verity-store.nix
+      {
+        nixpkgs.hostPlatform = "x86_64-linux";
+        system.stateVersion = "24.05";
+        system.image.updates.url = "${updateUrl}";
+        system.image.id = "nixlet";
+        system.image.version = releaseVersion;
+      }
+    ];
   in {
-    nixosModules.server = {
-      imports = [
-        ./modules/profiles/server.nix
-      ];
-    };
-    nixosModules.image = {
-      imports = [
-        ./modules
-        ./modules/profiles/base.nix
-        ./modules/image
-      ];
-    };
     packages.x86_64-linux.nixlet = (nixpkgs.lib.nixosSystem {
-      modules = [
-        ({ lib, ... }: {
-          nixpkgs.hostPlatform = "x86_64-linux";
-          system.stateVersion = "24.05";
-        })
-        {
-          system.image.updates.url = "${updateUrl}";
-          system.image.id = "nixlet";
-          system.image.version = releaseVersion;
-        }
-        self.nixosModules.image
-        self.nixosModules.server
-      ];
+      modules = baseConfig;
     }).config.system.build.updatePackage;
     packages.x86_64-linux.nixlet-insecure = (nixpkgs.lib.nixosSystem {
-      modules = [
-        ({ lib, ... }: {
-          nixpkgs.hostPlatform = "x86_64-linux";
-          system.stateVersion = "24.05";
-        })
-        {
-          system.image.updates.url = "${updateUrl}";
-          system.image.id = "nixlet-insecure";
-          system.image.version = releaseVersion;
-          system.image.filesystems.encrypt = false;
-        }
-        self.nixosModules.image
-        self.nixosModules.server
-      ];
+      modules = baseConfig ++ [ {
+        system.image.filesystems.encrypt = false;
+      } ];
     }).config.system.build.updatePackage;
     checks.x86_64-linux = nixpkgs.lib.listToAttrs (map (test: nixpkgs.lib.nameValuePair "${test}" (import ./tests/${test}.nix {
       pkgs = nixpkgs.legacyPackages."x86_64-linux";
