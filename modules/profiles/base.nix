@@ -48,6 +48,13 @@
 
   services.openssh.settings.PasswordAuthentication = lib.mkDefault false;
 
+  services.openssh.hostKeys = [
+    {
+      path = "/etc/ssh/ssh_host_ed25519_key";
+      type = "ed25519";
+    }
+  ];
+
   systemd.watchdog = lib.mkDefault {
     runtimeTime = "10s";
     rebootTime = "30s";
