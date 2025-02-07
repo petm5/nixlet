@@ -8,12 +8,14 @@
     ./filesystems.nix
   ];
 
-  system.build.updatePackage = pkgs.runCommand "update-package" {} ''
+  system.build.updatePackage = (pkgs.runCommand "update-package" {} ''
     mkdir $out
     cd $out
     cp "${config.system.build.image}"/* .
     ${pkgs.coreutils}/bin/sha256sum * > SHA256SUMS
-  '';
+  '') // {
+    diskImage = "${config.system.build.image}/${config.system.build.image.imageFile}";
+  };
 
   boot.initrd.systemd.enable = true;
 
@@ -32,11 +34,15 @@
   services.userborn.enable = false;
   systemd.sysusers.enable = true;
 
-  services.openssh.hostKeys = [
-    {
-      path = "/etc/ssh/ssh_host_ed25519_key";
-      type = "ed25519";
-    }
-  ];
+  systemd.package = pkgs.systemd.override {
+    withAcl = false;
+    withApparmor = false;
+    withDocumentation = false;
+    withRemote = false;
+    withShellCompletions = false;
+    withVmspawn = false;
+    withEfi = false;
+    withFido2 = false;
+  };
 
 }

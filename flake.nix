@@ -57,5 +57,17 @@
       pkgs = nixpkgs.legacyPackages."x86_64-linux";
       inherit self;
     })) [ "integration" "system-update" ]);
+    apps.x86_64-linux.nixlet-live-test = let
+      script = (import ./tests/common.nix rec {
+        inherit self;
+        pkgs = nixpkgs.legacyPackages."x86_64-linux";
+        lib = pkgs.lib;
+      }).makeInteractiveTest {
+        image = self.packages.x86_64-linux.nixlet-insecure.diskImage;
+      };
+    in {
+      type = "app";
+      program = toString script;
+    };
   };
 }

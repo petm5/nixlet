@@ -105,4 +105,39 @@ in rec {
     '';
   };
 
+  makeInteractiveTest = { image, qemu ? pkgs.qemu_kvm, OVMF ? pkgs.OVMF, runtimeShell ? pkgs.runtimeShell }: let
+    qemuCommand = qemu-common.qemuBinary qemu;
+    flags = [
+      "-m" "512M"
+      "-drive" "if=pflash,format=raw,unit=0,readonly=on,file=${OVMF.firmware}"
+      "-drive" "if=pflash,format=raw,unit=1,readonly=on,file=${OVMF.variables}"
+      "-drive" "if=virtio,file=${mutableImage}"
+      "-netdev" "'user,id=net0,hostfwd=tcp:127.0.0.1:2222-:22'"
+      "-device" "virtio-net-pci,netdev=net0"
+      "-serial" "stdio"
+    ];
+    flagsStr = lib.concatStringsSep " " flags;
+    startCommand = "${qemuCommand} ${flagsStr}";
+    mutableImage = "nixlet-disk.qcow2";
+    tpmFolder = "emulated_tpm";
+    qemuImgCommand = "${qemu}/bin/qemu-img";
+    imgFlags = [
+      "create"
+      "-f" "qcow2"
+      "-F" "raw"
+      "-b" "${image}"
+      "${mutableImage}"
+      "2G"
+    ];
+    imgFlagsStr = lib.concatStringsSep " " imgFlags;
+    imgCommand = "${qemuImgCommand} ${imgFlagsStr}";
+  in pkgs.writeScript "qemu-interactive-test" ''
+    #!${runtimeShell}
+    if [ ! -e "${mutableImage}" ]; then
+      echo "Creating mutable image at ${mutableImage}"
+      ${imgCommand}
+    fi
+    ${startCommand}
+  '';
+
 }
