@@ -76,6 +76,7 @@
   boot.kernelParams = [
     "panic=1" "boot.panic_on_fail"
     "console=ttyS0" "console=tty0"
+    "quiet"
     "systemd.journald.forward_to_console"
   ];
 
