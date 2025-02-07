@@ -34,15 +34,4 @@
   services.userborn.enable = false;
   systemd.sysusers.enable = true;
 
-  systemd.package = pkgs.systemd.override {
-    withAcl = false;
-    withApparmor = false;
-    withDocumentation = false;
-    withRemote = false;
-    withShellCompletions = false;
-    withVmspawn = false;
-    withEfi = false;
-    withFido2 = false;
-  };
-
 }
