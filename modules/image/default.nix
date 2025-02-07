@@ -3,19 +3,9 @@
   imports = [
     ./updater.nix
     ./ssh.nix
-    ./builder.nix
-    ./veritysetup.nix
+    ./repart-verity-store.nix
     ./filesystems.nix
   ];
-
-  system.build.updatePackage = (pkgs.runCommand "update-package" {} ''
-    mkdir $out
-    cd $out
-    cp "${config.system.build.image}"/* .
-    ${pkgs.coreutils}/bin/sha256sum * > SHA256SUMS
-  '') // {
-    diskImage = "${config.system.build.image}/${config.system.build.image.imageFile}";
-  };
 
   boot.initrd.systemd.enable = true;
 
@@ -26,7 +16,6 @@
 
   boot.initrd.supportedFilesystems = {
     btrfs = true;
-    erofs = true;
   };
 
   system.etc.overlay.mutable = true;

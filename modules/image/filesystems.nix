@@ -60,16 +60,9 @@ in {
 
     boot.initrd.systemd.services.systemd-repart.after = lib.mkForce [ ];
 
-    boot.kernelParams = [ "rootfstype=btrfs" "rootflags=rw" "mount.usrfstype=erofs" "mount.usrflags=ro" "usrhash=${config.system.build.verityUsrHash}" ];
-
-    fileSystems."/nix/store" = {
-      device = "/usr";
-      options = [ "bind" ];
-    };
+    boot.kernelParams = [ "rootfstype=btrfs" "rootflags=rw" ];
 
     boot.initrd.systemd.root = "gpt-auto";
-
-    boot.initrd.systemd.additionalUpstreamUnits = [ "initrd-usr-fs.target" ];
 
     # Required to mount the efi partition
     boot.kernelModules = [ "vfat" "nls_cp437" "nls_iso8859-1" ];

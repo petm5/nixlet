@@ -36,7 +36,7 @@ in rec {
 
   makeImage = extraConfig: let
     system = makeSystem extraConfig;
-  in "${system.config.system.build.image}/${system.config.system.build.image.imageFile}";
+  in "${system.config.system.build.updatePackage}/${system.config.system.build.updatePackage.combinedImage}";
 
   makeUpdatePackage = extraConfig: let
     system = makeSystem extraConfig;

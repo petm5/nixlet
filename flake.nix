@@ -19,7 +19,7 @@
       imports = [
         ./modules
         ./modules/profiles/base.nix
-        ./modules/image/disk
+        ./modules/image
       ];
     };
     packages.x86_64-linux.nixlet = (nixpkgs.lib.nixosSystem {
@@ -63,7 +63,7 @@
         pkgs = nixpkgs.legacyPackages."x86_64-linux";
         lib = pkgs.lib;
       }).makeInteractiveTest {
-        image = self.packages.x86_64-linux.nixlet-insecure.diskImage;
+        image = "${self.packages.x86_64-linux.nixlet-insecure}/${self.packages.x86_64-linux.nixlet-insecure.combinedImage}";
       };
     in {
       type = "app";
