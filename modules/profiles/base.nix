@@ -96,4 +96,6 @@
   networking.useNetworkd = true;
   systemd.network.wait-online.enable = lib.mkDefault false;
 
+  time.timeZone = "UTC";
+
 }
