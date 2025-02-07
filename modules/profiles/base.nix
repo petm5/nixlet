@@ -2,7 +2,7 @@
 
   # Start out with a minimal system
   imports = [
-    (modulesPath + "/profiles/image-based-appliance.nix")
+    (modulesPath + "/profiles/minimal.nix")
     (modulesPath + "/profiles/perlless.nix")
     (modulesPath + "/profiles/qemu-guest.nix")
   ];
@@ -78,6 +78,13 @@
   services.journald.storage = "volatile";
 
   console.enable = false;
+
+  users.mutableUsers = lib.mkDefault false;
+
+  nix.enable = false;
+  system.switch.enable = false;
+
+  boot.initrd.systemd.enable = true;
 
   networking.useNetworkd = true;
   systemd.network.wait-online.enable = lib.mkDefault false;
