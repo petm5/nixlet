@@ -6,6 +6,7 @@
   sshKeys = import (pkgs.path + "/nixos/tests/ssh-keys.nix") pkgs;
 
   initialImage = test-common.makeImage {
+    system.image.sshKeys.enable = true;
     system.image.sshKeys.keys = [ sshKeys.snakeOilPublicKey ];
     system.extraDependencies = [ sshKeys.snakeOilPrivateKey ];
   };
