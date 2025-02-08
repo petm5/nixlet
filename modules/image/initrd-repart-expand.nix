@@ -74,8 +74,8 @@ in {
     boot.kernelModules = [ "vfat" "nls_cp437" "nls_iso8859-1" ];
 
     # Don't wait for TPM with encryption disabled
-    boot.initrd.systemd.tpm2.enable = !cfg.encrypt;
-    systemd.tpm2.enable = !cfg.encrypt;
+    boot.initrd.systemd.tpm2.enable = cfg.encrypt;
+    systemd.tpm2.enable = cfg.encrypt;
 
   }) (lib.mkIf cfg.encrypt {
 
