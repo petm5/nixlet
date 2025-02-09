@@ -104,7 +104,7 @@ in {
     };
 
     image.repart.mkfsOptions = lib.mkIf config.system.image.compress {
-      erofs = [ "-zlz4hc,level=12" "-Efragments,dedupe,ztailpacking" ];
+      erofs = [ "-zlz4hc,12" "-C1048576" "-Efragments,dedupe,ztailpacking" ];
     };
 
     system.build = {
