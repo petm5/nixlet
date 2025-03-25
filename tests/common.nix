@@ -16,6 +16,7 @@ in rec {
     modules = [
       ../modules/image/repart-verity-store.nix
       ../modules/image/initrd-repart-expand.nix
+      ../modules/image/sysupdate-verity-store.nix
       ../modules/profiles/minimal.nix
       ../modules/profiles/image-based.nix
       ../modules/profiles/server.nix
