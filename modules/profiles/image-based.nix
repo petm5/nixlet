@@ -20,4 +20,6 @@
   services.userborn.enable = false;
   systemd.sysusers.enable = true;
 
+  systemd.services."systemd-oomd".unitConfig.After = "systemd-sysusers.service";
+
 }
