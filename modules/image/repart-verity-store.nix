@@ -140,24 +140,33 @@ in {
         '';
       });
 
-      updatePackage = (pkgs.linkFarm "${config.system.build.image.pname}-update-package" [
-        {
-          name = "${config.system.image.id}_${config.system.image.version}.efi";
-          path = "${config.system.build.uki}/${config.system.boot.loader.ukiFile}";
-        }
-        {
-          name = "${config.system.image.id}_${config.system.image.version}_${verityUuid}.verity";
-          path = "${config.system.build.finalImage}/${config.image.repart.imageFileBasename}.verity.raw";
-        }
-        {
-          name = "${config.system.image.id}_${config.system.image.version}_${usrUuid}.usr";
-          path = "${config.system.build.finalImage}/${config.image.repart.imageFileBasename}.usr.raw";
-        }
+      updatePackage = let
+        updateFiles = [
+          {
+            name = "${config.system.image.id}_${config.system.image.version}.efi";
+            path = "${config.system.build.uki}/${config.system.boot.loader.ukiFile}";
+          }
+          {
+            name = "${config.system.image.id}_${config.system.image.version}_${verityUuid}.verity";
+            path = "${config.system.build.finalImage}/${config.image.repart.imageFileBasename}.verity.raw";
+          }
+          {
+            name = "${config.system.image.id}_${config.system.image.version}_${usrUuid}.usr";
+            path = "${config.system.build.finalImage}/${config.image.repart.imageFileBasename}.usr.raw";
+          }
+        ];
+        createHash = { name, path }: lib.concatStringsSep "  " [ (builtins.hashFile "sha256" path) name ];
+      in (pkgs.linkFarm "${config.system.build.image.pname}-update-package" (updateFiles ++ [
         {
           name = "${config.system.image.id}_${config.system.image.version}.img";
           path = "${config.system.build.finalImage}/${config.image.repart.imageFileBasename}.raw";
         }
-      ]) // {
+        {
+          name = "SHA256SUMS";
+          path = pkgs.writeText "sha256sums.txt" (lib.concatLines (map createHash updateFiles));
+        }
+      ]))
+      // {
         combinedImage = "${config.system.image.id}_${config.system.image.version}.img";
       };
 
