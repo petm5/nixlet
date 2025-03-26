@@ -3,8 +3,9 @@
   inherit (pkgs.stdenv.hostPlatform) efiArch;
 
   verityImgAttrs = builtins.fromJSON (builtins.readFile "${config.system.build.intermediateImage}/repart-output.json");
-  usrAttrs = builtins.elemAt verityImgAttrs 1;
-  verityAttrs = builtins.elemAt verityImgAttrs 0;
+  # HACK: Magic indices are used to select partitions, which is error-prone
+  usrAttrs = builtins.elemAt verityImgAttrs 2;
+  verityAttrs = builtins.elemAt verityImgAttrs 1;
 
   usrUuid = usrAttrs.uuid;
   verityUuid = verityAttrs.uuid;
