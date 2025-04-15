@@ -22,5 +22,6 @@ sudo umount /mnt
 sudo losetup -d "$loopdev"
 
 pushd nixlet-signed
+rm -f SHA256SUMS
 sha256sum * > SHA256SUMS
 popd
