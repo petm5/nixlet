@@ -23,5 +23,5 @@ sudo losetup -d "$loopdev"
 
 pushd nixlet-signed
 rm -f SHA256SUMS
-sha256sum *.[!img] > SHA256SUMS
+sha256sum *.*[^img] > SHA256SUMS
 popd
