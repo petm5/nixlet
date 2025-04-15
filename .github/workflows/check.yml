@@ -1,0 +1,14 @@
+name: Validate
+
+on:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: cachix/install-nix-action@v30
+    - uses: DeterminateSystems/magic-nix-cache-action@v2
+    - name: nix flake check
+      run: nix flake check
