@@ -1,0 +1,76 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - '*'
+
+jobs:
+
+  build-insecure-unsigned:
+    runs-on: ubuntu-latest
+    steps:
+    - run: echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns
+    - uses: actions/checkout@v4
+    - uses: cachix/install-nix-action@v30
+    - uses: DeterminateSystems/magic-nix-cache-action@v2
+    - name: nix build
+      run: nix build .#nixlet-insecure -o nixlet-insecure-unsigned
+    - name: Sign for Secure Boot
+      env:
+        DB_KEY: ${{ secrets.DBKEY }}
+        DB_CRT: ${{ secrets.DBCRT }}
+      run: ./scripts/sign-release.sh
+    - name: Archive build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: nixlet-insecure-unsigned
+        path: nixlet-insecure-unsigned
+
+  build-signed:
+    needs: build-insecure-unsigned
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+    - run: echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns
+    - uses: actions/checkout@v4
+    - uses: cachix/install-nix-action@v30
+    - uses: DeterminateSystems/magic-nix-cache-action@v2
+    - name: nix build
+      run: nix build .#nixlet -o nixlet-unsigned
+    - name: Sign for Secure Boot
+      env:
+        DB_KEY: ${{ secrets.DBKEY }}
+        DB_CRT: ${{ secrets.DBCRT }}
+      run: ./scripts/sign-release.sh
+    - name: Archive build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: nixlet-signed
+        path: nixlet-signed
+
+  release:
+    if: github.ref_name == 'main'
+    needs: [build-signed, build-insecure-unsigned]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v4
+    - name: Download signed artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: nixlet-signed
+    - name: Download insecure artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: nixlet-insecure-unsigned
+    - uses: cachix/install-nix-action@v30
+    - name: Generate release bundle
+      run: ./scripts/pack-release.sh
+    - name: Release
+      uses: ncipollo/release-action@v1.14.0
+      with:
+        artifacts: "release/*"
