@@ -27,7 +27,9 @@ jobs:
         DB_KEY: ${{ secrets.DBKEY }}
         DB_CRT: ${{ secrets.DBCRT }}
       run: ./scripts/sign-release.sh
+    - name: Generate Release Bundle
+      run: ./scripts/pack-release.sh
     - name: Release
       uses: ncipollo/release-action@v1.14.0
       with:
-        artifacts: "nixlet-signed/*,nixlet-insecure-unsigned/*"
+        artifacts: "release/*"
