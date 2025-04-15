@@ -34,6 +34,7 @@
     packages.x86_64-linux.nixlet-insecure = (nixpkgs.lib.nixosSystem {
       modules = baseConfig ++ [ {
         system.image.filesystems.encrypt = false;
+        system.image.id = nixpkgs.lib.mkOverride 0 "nixlet-insecure";
       } ];
     }).config.system.build.updatePackage;
     checks.x86_64-linux = nixpkgs.lib.listToAttrs (map (test: nixpkgs.lib.nameValuePair "${test}" (import ./tests/${test}.nix {
