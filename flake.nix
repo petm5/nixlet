@@ -53,5 +53,6 @@
       type = "app";
       program = toString script;
     };
+    devShells.x86_64-linux.default = import ./shell.nix { inherit pkgs; };
   };
 }
