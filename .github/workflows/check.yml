@@ -1,14 +1,23 @@
 name: Validate
 
 on:
+  workflow_call:
   pull_request:
+  push:
+    branches-ignore:
+      - main
 
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: cachix/install-nix-action@v30
-    - uses: DeterminateSystems/magic-nix-cache-action@v2
+    - uses: nixbuild/nix-quick-install-action@v30
+    - run: echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns
+    - uses: nix-community/cache-nix-action@v6
+      with:
+        primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+        restore-prefixes-first-match: nix-${{ runner.os }}-
+        gc-max-store-size-linux: 1G
     - name: nix flake check
       run: nix flake check
