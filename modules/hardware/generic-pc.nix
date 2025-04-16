@@ -8,6 +8,7 @@
     "xhci-hcd" "xhci-pci" "xhci-pci-renesas"
     "nvme"
     "aesni_intel" "crypto_simd"
+    "kvm" "kvm_intel" "kvm_amd"
   ];
 
 }
