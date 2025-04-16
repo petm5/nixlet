@@ -13,6 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: nixbuild/nix-quick-install-action@v30
+    - run: echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns
     - uses: nix-community/cache-nix-action@v6
       with:
         primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
