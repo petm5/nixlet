@@ -20,6 +20,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: nixlet-unsigned
+        path: nixlet-unsigned
     - name: Sign for Secure Boot
       env:
         DB_KEY: ${{ secrets.DBKEY }}
@@ -29,6 +30,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: nixlet-insecure-unsigned
+        path: nixlet-insecure-unsigned
     - name: Generate release bundle
       run: ./scripts/pack-release.sh
     - name: Release
