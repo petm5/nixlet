@@ -1,0 +1,12 @@
+name: Develop
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  check:
+    uses: ./.github/workflows/check.yml
+  build:
+    uses: ./.github/workflows/build.yml

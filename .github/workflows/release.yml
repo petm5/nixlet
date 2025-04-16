@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+  release:
+    if: github.ref_name == 'main'
+    needs: [build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v4
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: nixlet-unsigned
+    - name: Sign for Secure Boot
+      env:
+        DB_KEY: ${{ secrets.DBKEY }}
+        DB_CRT: ${{ secrets.DBCRT }}
+      run: ./scripts/sign-release.sh
+    - name: Download insecure artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: nixlet-insecure-unsigned
+    - uses: nixbuild/nix-quick-install-action@v30
+    - name: Generate release bundle
+      run: ./scripts/pack-release.sh
+    - name: Release
+      uses: ncipollo/release-action@v1.14.0
+      with:
+        artifacts: "release/*"

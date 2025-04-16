@@ -1,14 +1,9 @@
 name: Build
 
 on:
-  push:
-    branches:
-      - main
-    tags:
-      - '*'
+  workflow_call:
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -22,11 +17,6 @@ jobs:
         gc-max-store-size-linux: 1G
     - name: Build nixlet-insecure
       run: nix build .#nixlet-insecure -o nixlet-insecure-unsigned
-    - name: Sign for Secure Boot
-      env:
-        DB_KEY: ${{ secrets.DBKEY }}
-        DB_CRT: ${{ secrets.DBCRT }}
-      run: ./scripts/sign-release.sh
     - name: Archive nixlet-insecure build artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -34,37 +24,8 @@ jobs:
         path: nixlet-insecure-unsigned
     - name: Build nixlet
       run: nix build .#nixlet -o nixlet-unsigned
-    - name: Sign for Secure Boot
-      env:
-        DB_KEY: ${{ secrets.DBKEY }}
-        DB_CRT: ${{ secrets.DBCRT }}
-      run: ./scripts/sign-release.sh
     - name: Archive nixlet build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: nixlet-signed
-        path: nixlet-signed
-
-  release:
-    if: github.ref_name == 'main'
-    needs: [build]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-    - uses: actions/checkout@v4
-    - name: Download signed artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: nixlet-signed
-    - name: Download insecure artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: nixlet-insecure-unsigned
-    - uses: nixbuild/nix-quick-install-action@v30
-    - name: Generate release bundle
-      run: ./scripts/pack-release.sh
-    - name: Release
-      uses: ncipollo/release-action@v1.14.0
-      with:
-        artifacts: "release/*"
+        name: nixlet-unsigned
+        path: nixlet-unsigned
