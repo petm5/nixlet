@@ -1,0 +1,17 @@
+[Transfer]
+Verify=no
+
+[Source]
+Type=regular-file
+Path=nixlet-insecure
+MatchPattern=nixlet-insecure_@v.efi
+
+[Target]
+Type=regular-file
+Path=/EFI/Linux
+PathRelativeTo=esp
+MatchPattern=nixlet-insecure_@v+@l-@d.efi nixlet-insecure_@v+@l.efi nixlet-insecure_@v.efi
+Mode=0444
+TriesLeft=3
+TriesDone=0
+InstancesMax=2
