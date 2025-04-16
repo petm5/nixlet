@@ -9,4 +9,5 @@ jobs:
   check:
     uses: ./.github/workflows/check.yml
   build:
+    needs: check
     uses: ./.github/workflows/build.yml
