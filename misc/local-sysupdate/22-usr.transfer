@@ -1,0 +1,14 @@
+[Transfer]
+Verify=no
+
+[Source]
+Type=regular-file
+Path=nixlet-insecure
+MatchPattern=nixlet-insecure_@v_@u.usr
+
+[Target]
+Type=partition
+Path=auto
+MatchPattern=usr-@v
+MatchPartitionType=usr
+ReadOnly=1

@@ -1,0 +1,14 @@
+[Transfer]
+Verify=no
+
+[Source]
+Type=regular-file
+Path=nixlet-insecure
+MatchPattern=nixlet-insecure_@v_@u.verity
+
+[Target]
+Type=partition
+Path=auto
+MatchPattern=verity-@v
+MatchPartitionType=usr-verity
+ReadOnly=1
