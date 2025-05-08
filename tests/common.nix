@@ -50,7 +50,7 @@ in rec {
     system = makeSystem extraConfig;
   in "${system.config.system.build.updatePackage}";
 
-  makeImageTest = { name, image, script, httpRoot ? null }: let
+  makeImageTest = { name, image, script, httpRoot ? null, sshAuthorizedKey ? null }: let
     qemu = qemu-common.qemuBinary pkgs.qemu_test;
     flags = [
       "-m" "512M"
@@ -62,7 +62,9 @@ in rec {
       "-device" "tpm-tis,tpmdev=tpm0"
       "-netdev" ("'user,id=net0" + (lib.optionalString (httpRoot != null) ",guestfwd=tcp:10.0.2.1:80-cmd:${pkgs.micro-httpd}/bin/micro_httpd ${httpRoot}") + "'")
       "-device" "virtio-net-pci,netdev=net0"
-    ];
+    ] ++ (lib.optionals (sshAuthorizedKey != null) [
+      "-smbios" ("'type=11,value=io.systemd.credential:ssh.authorized_keys.root=" + sshAuthorizedKey + "'")
+    ]);
     flagsStr = lib.concatStringsSep " " flags;
     startCommand = "${qemu} ${flagsStr}";
     mutableImage = "/tmp/linked-image.qcow2";

@@ -58,30 +58,5 @@
 
   time.timeZone = "UTC";
 
-  systemd.services."default-ssh-keys" = {
-    script = ''
-      mkdir /root/.ssh
-
-      # Try to copy keys from the ESP
-      if [ -e /boot/default-ssh-authorized-keys.txt ]; then
-        cat /boot/default-ssh-authorized-keys.txt >> /root/.ssh/authorized_keys
-        exit 0
-      fi
-
-      # Otherwise, generate a default keypair and display it
-      ${pkgs.openssh}/bin/ssh-keygen -f /root/.ssh/id_default -t ed25519
-      cat /root/.ssh/id_default.pub > /root/.ssh/authorized_keys
-      if [ -e /dev/ttyS0 ]; then
-        cat /root/.ssh/id_default > /dev/ttyS0
-      fi
-      if [ -e /dev/tty1 ]; then
-        cat /root/.ssh/id_default | ${pkgs.qrencode}/bin/qrencode -t UTF8 > /dev/tty1
-      fi
-    '';
-    wantedBy = [ "sshd.service" "sshd.socket" ];
-    unitConfig = {
-      ConditionPathExists = [ "!/root/.ssh/authorized_keys" ];
-    };
-  };
 
 }

@@ -22,6 +22,11 @@
   # Modules must be loaded by initrd
   boot.initrd.kernelModules = config.boot.kernelModules;
 
+  boot.kernelModules = [
+    # Required for systemd SMBIOS credential import
+    "dmi_sysfs"
+  ];
+
   # Remove foreign language support
   i18n.supportedLocales = [
     "en_US.UTF-8/UTF-8"
