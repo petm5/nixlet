@@ -58,5 +58,12 @@
 
   time.timeZone = "UTC";
 
+  # The system should reboot on failure
+  systemd.watchdog = {
+    runtimeTime = "10s";
+    rebootTime = "30s";
+  };
+
+  boot.kernelParams = [ "panic=30" "boot.panic_on_fail" ];
 
 }

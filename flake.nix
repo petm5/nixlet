@@ -12,7 +12,6 @@
     baseConfig = [
       ./modules/profiles/minimal.nix
       ./modules/profiles/image-based.nix
-      ./modules/profiles/headless.nix
       ./modules/profiles/server.nix
       ./modules/hardware/generic-pc.nix
       (nixpkgs + "/nixos/modules/profiles/qemu-guest.nix")
