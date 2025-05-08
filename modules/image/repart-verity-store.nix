@@ -17,13 +17,6 @@ in {
     compress = lib.mkEnableOption "image compression" // {
       default = true;
     };
-    sshKeys = {
-      enable = lib.mkEnableOption "provisioning of default SSH keys from ESP";
-      keys = lib.mkOption {
-        type = lib.types.listOf lib.types.singleLineStr;
-        default = [];
-      };
-    };
   };
 
   imports = [
@@ -62,11 +55,6 @@ in {
           # Include systemd-boot
           "/EFI/BOOT/BOOT${lib.toUpper efiArch}.EFI".source =
             "${pkgs.systemdUkify}/lib/systemd/boot/efi/systemd-boot${efiArch}.efi";
-
-          # Include default SSH keys, used in tests
-          "/default-ssh-authorized-keys.txt" = lib.mkIf config.system.image.sshKeys.enable {
-            source = pkgs.writeText "ssh-keys" (lib.concatStringsSep "\n" config.system.image.sshKeys.keys);
-          };
         };
         repartConfig = {
           Type = "esp";

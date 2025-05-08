@@ -6,23 +6,24 @@
   sshKeys = import (pkgs.path + "/nixos/tests/ssh-keys.nix") pkgs;
 
   initialImage = test-common.makeImage {
-    system.image.sshKeys.enable = true;
-    system.image.sshKeys.keys = [ sshKeys.snakeOilPublicKey ];
     system.extraDependencies = [ sshKeys.snakeOilPrivateKey ];
   };
 
 in test-common.makeImageTest {
   name = "integration";
   image = initialImage;
+  sshAuthorizedKey = sshKeys.snakeOilPublicKey;
   script = ''
     start_tpm()
     machine.start()
 
     machine.wait_for_unit("multi-user.target")
 
+    machine.succeed("systemd-creds --system list > /dev/console")
+    machine.succeed("systemd-run -p ImportCredential=ssh.authorized_keys.root -P --wait systemd-creds cat ssh.authorized_keys.root")
+
     # Test SSH key provisioning functionality
 
-    machine.succeed("[ -e /boot/default-ssh-authorized-keys.txt ]")
     machine.succeed("[ -e /root/.ssh/authorized_keys ]")
 
     machine.wait_for_open_port(22)
