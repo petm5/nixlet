@@ -1,4 +1,4 @@
-{ config, modulesPath, ... }: {
+{ config, pkgs, modulesPath, ... }: {
 
   imports = [
     (modulesPath + "/profiles/minimal.nix")
@@ -21,6 +21,15 @@
 
   # Modules must be loaded by initrd
   boot.initrd.kernelModules = config.boot.kernelModules;
+
+  systemd.package = pkgs.systemd.overrideAttrs {
+    src = pkgs.fetchFromGitHub {
+      owner = "petm5";
+      repo = "systemd";
+      rev = "c70d5474185d1bc49bdc1a5a296694ae7194c08d";
+      hash = "sha256-kXySBrV/lGJD34va2oSZ67B+f+IUav1Vv9UvwLe3Z0g=";
+    };
+  };
 
   boot.kernelModules = [
     # Required for systemd SMBIOS credential import
