@@ -64,6 +64,11 @@
     rebootTime = "30s";
   };
 
-  boot.kernelParams = [ "panic=30" "boot.panic_on_fail" ];
+  boot.kernelParams = [ "panic=30" "boot.panic_on_fail" "quiet" ];
+
+  # Enable configuration on first boot
+  systemd.additionalUpstreamSystemUnits = [
+    "systemd-firstboot.service"
+  ];
 
 }
