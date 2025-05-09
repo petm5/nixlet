@@ -16,6 +16,11 @@ jobs:
       contents: write
     steps:
     - uses: actions/checkout@v4
+    - name: Read version
+      id: version
+      run: |
+        VERSION=$(cat VERSION)
+        echo "version=$VERSION" >> $GITHUB_ENV
     - name: Download artifacts
       uses: actions/download-artifact@v4
       with:
@@ -37,3 +42,5 @@ jobs:
       uses: ncipollo/release-action@v1.14.0
       with:
         artifacts: "release/*"
+        tag: ${{ env.version }}
+        name: Release ${{ env.version }}

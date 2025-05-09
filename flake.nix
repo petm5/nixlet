@@ -8,7 +8,7 @@
       system = "x86_64-linux";
     };
     updateUrl = "https://github.com/petm5/nixlet/releases/latest/download";
-    releaseVersion = "0.1.6";
+    releaseVersion = nixpkgs.lib.strings.trim (builtins.readFile ./VERSION);
     baseConfig = [
       ./modules/profiles/minimal.nix
       ./modules/profiles/image-based.nix
