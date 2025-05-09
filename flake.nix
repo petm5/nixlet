@@ -8,7 +8,7 @@
       system = "x86_64-linux";
     };
     updateUrl = "https://github.com/petm5/nixlet/releases/latest/download";
-    releaseVersion = builtins.readFile ./VERSION;
+    releaseVersion = nixpkgs.lib.strings.trim (builtins.readFile ./VERSION);
     baseConfig = [
       ./modules/profiles/minimal.nix
       ./modules/profiles/image-based.nix
