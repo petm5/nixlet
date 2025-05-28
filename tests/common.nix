@@ -14,7 +14,9 @@ in rec {
     inherit pkgs lib;
     system = null;
     modules = [
-      ../modules/image/repart-verity-store.nix
+      (pkgs.path + "/nixos/modules/image/repart.nix")
+      ../modules/image/repart-image-verity-store-defaults.nix
+      ../modules/image/update-package.nix
       ../modules/image/initrd-repart-expand.nix
       ../modules/image/sysupdate-verity-store.nix
       ../modules/profiles/minimal.nix
@@ -22,18 +24,18 @@ in rec {
       ../modules/profiles/server.nix
       (pkgs.path + "/nixos/modules/profiles/qemu-guest.nix")
       {
+        boot.kernelPackages = pkgs.linuxPackages_latest;
         users.allowNoPasswordLogin = true;
         system.stateVersion = lib.versions.majorMinor lib.version;
-        system.image.id = lib.mkDefault "test";
+        system.image.id = lib.mkDefault "nixos-appliance";
         system.image.version = lib.mkDefault "1";
         networking.hosts."10.0.2.1" = [ "server.test" ];
         boot.kernelParams = [
           "x-systemd.device-timeout=10s"
           "console=ttyS0,115200n8"
-          "panic=0" "boot.panic_on_fail"
         ];
         # Use weak compression
-        system.image.compress = false;
+        image.repart.compression.enable = false;
         boot.initrd.compressor = "zstd";
         boot.initrd.compressorArgs = [ "-2" ];
       }
@@ -44,7 +46,7 @@ in rec {
 
   makeImage = extraConfig: let
     system = makeSystem extraConfig;
-  in "${system.config.system.build.updatePackage}/${system.config.system.build.updatePackage.combinedImage}";
+  in "${system.config.system.build.finalImage}/${system.config.image.fileName}";
 
   makeUpdatePackage = extraConfig: let
     system = makeSystem extraConfig;
@@ -130,7 +132,6 @@ in rec {
     flagsStr = lib.concatStringsSep " " flags;
     startCommand = "${qemuCommand} ${flagsStr}";
     mutableImage = "nixlet-disk.qcow2";
-    tpmFolder = "emulated_tpm";
     qemuImgCommand = "${qemu}/bin/qemu-img";
     imgFlags = [
       "create"
