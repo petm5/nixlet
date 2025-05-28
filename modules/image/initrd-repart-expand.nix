@@ -62,6 +62,8 @@ in {
       };
     };
 
+    boot.initrd.systemd.additionalUpstreamUnits = [ "initrd-usr-fs.target" ];
+
     boot.initrd.systemd.services.systemd-repart.after = lib.mkForce [ ];
 
     boot.initrd.supportedFilesystems.btrfs = true;
