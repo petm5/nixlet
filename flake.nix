@@ -1,8 +1,7 @@
 {
   description = "Minimal image-based NixOS configuration";
   inputs = {
-    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
-    nixpkgs.url = "github:petm5/nixpkgs/fix-init-run-mount";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
   };
   outputs = { self, nixpkgs }: let
     pkgs = import nixpkgs {
