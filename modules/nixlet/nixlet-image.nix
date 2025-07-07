@@ -84,7 +84,7 @@ in {
     boot.initrd.compressorArgs = [ (if cfg.compress then "-6" else "-1") ];
 
     image.repart = {
-      mkfsOptions.erofs = lib.mkIf cfg.compress [ "-zlz4hc,12" "-C1048576" "-Efragments,dedupe,ztailpacking" ];
+      mkfsOptions.erofs = lib.mkIf cfg.compress [ "-zlz4hc,level=9" "-C1048576" "-Efragments,ztailpacking" ];
 
       verityStore.enable = true;
 
