@@ -12,6 +12,7 @@
 
   # Use systemd-based initrd
   boot.initrd.systemd.enable = true;
+  boot.initrd.availableKernelModules = [ "dmi_sysfs" ];
 
   # Use TCP BBR
   boot.kernel.sysctl = {

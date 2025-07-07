@@ -10,9 +10,4 @@
   # Modules must be loaded by initrd
   boot.initrd.kernelModules = config.boot.kernelModules;
 
-  boot.kernelModules = [
-    # Required for systemd SMBIOS credential import
-    "dmi_sysfs"
-  ];
-
 }
