@@ -1,7 +1,6 @@
 {
 
-  # Explicitly load networking modules
-  boot.kernelModules = [
+  boot.availableKernelModules = [
     "ip_tables"
     "x_tables"
     "nf_tables"

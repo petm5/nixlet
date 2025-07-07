@@ -1,7 +1,7 @@
 # Support some generic PC hardware
 {
 
-  boot.kernelModules = [
+  boot.availableKernelModules = [
     "usb_storage" "uas" "sd_mod"
     "r8169"
     "ehci-hcd" "ehci-pci"
