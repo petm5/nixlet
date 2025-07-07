@@ -9,12 +9,7 @@
 
   # Try to avoid interpreters
   networking.useNetworkd = true;
-  systemd.network.wait-online.enable = lib.mkDefault false;
   boot.initrd.systemd.enable = true;
-
-  # Use a simple bootloader
-  boot.loader.grub.enable = false;
-  boot.loader.systemd-boot.enable = true;
 
   # The system does not need "human" users
   services.userborn.enable = false;

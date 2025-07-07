@@ -1,17 +1,4 @@
-{ lib, ... }: {
-
-  # Use TCP BBR
-  boot.kernel.sysctl = {
-    "net.core.default_qdisc" = "fq";
-    "net.ipv4.tcp_congestion_control" = "bbr";
-  };
-
-  # Use nftables
-  networking.nftables.enable = lib.mkDefault true;
-
-  # Use systemd-networkd
-  networking.useNetworkd = true;
-  systemd.network.wait-online.enable = true;
+{
 
   # Explicitly load networking modules
   boot.kernelModules = [

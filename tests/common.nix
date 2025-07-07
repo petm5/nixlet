@@ -14,20 +14,12 @@ in rec {
     inherit pkgs lib;
     system = null;
     modules = [
-      (pkgs.path + "/nixos/modules/image/repart.nix")
-      ../modules/image/repart-image-verity-store-defaults.nix
-      ../modules/image/update-package.nix
-      ../modules/image/initrd-repart-expand.nix
-      ../modules/image/sysupdate-verity-store.nix
-      ../modules/profiles/minimal.nix
-      ../modules/profiles/image-based.nix
-      ../modules/profiles/server.nix
+      ../modules/nixlet/nixlet-image.nix
       (pkgs.path + "/nixos/modules/profiles/qemu-guest.nix")
       {
-        boot.kernelPackages = pkgs.linuxPackages_latest;
         users.allowNoPasswordLogin = true;
         system.stateVersion = lib.versions.majorMinor lib.version;
-        system.image.id = lib.mkDefault "nixos-appliance";
+        system.image.id = lib.mkDefault "nixlet-test";
         system.image.version = lib.mkDefault "1";
         networking.hosts."10.0.2.1" = [ "server.test" ];
         boot.kernelParams = [
@@ -35,9 +27,7 @@ in rec {
           "console=ttyS0,115200n8"
         ];
         # Use weak compression
-        image.repart.compression.enable = false;
-        boot.initrd.compressor = "zstd";
-        boot.initrd.compressorArgs = [ "-2" ];
+        nixlet.compress = false;
       }
       (pkgs.path + "/nixos/modules/testing/test-instrumentation.nix")
       extraConfig
@@ -139,7 +129,7 @@ in rec {
       "-F" "raw"
       "-b" "${image}"
       "${mutableImage}"
-      "2G"
+      "4G"
     ];
     imgFlagsStr = lib.concatStringsSep " " imgFlags;
     imgCommand = "${qemuImgCommand} ${imgFlagsStr}";

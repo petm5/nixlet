@@ -9,36 +9,37 @@
     };
     updateUrl = "https://github.com/petm5/nixlet/releases/latest/download";
     releaseVersion = nixpkgs.lib.strings.trim (builtins.readFile ./VERSION);
-    baseConfig = [
-      (nixpkgs + "/nixos/modules/image/repart.nix")
-      ./modules/image/repart-image-verity-store-defaults.nix
-      ./modules/image/repart-image-compress.nix
-      ./modules/image/update-package.nix
-      ./modules/image/initrd-repart-expand.nix
-      ./modules/image/sysupdate-verity-store.nix
-      ./modules/profiles/minimal.nix
-      ./modules/profiles/image-based.nix
-      ./modules/profiles/server.nix
-      ./modules/hardware/generic-pc.nix
-      (nixpkgs + "/nixos/modules/profiles/qemu-guest.nix")
-      {
-        nixpkgs.hostPlatform = "x86_64-linux";
-        system.stateVersion = "24.05";
-        system.image.updates.url = "${updateUrl}";
-        system.image.id = "nixlet";
-        system.image.version = releaseVersion;
-        boot.kernelPackages = pkgs.linuxPackages_latest;
-      }
-    ];
   in {
     nixosSystems.x86_64-linux.nixlet = nixpkgs.lib.nixosSystem {
-      modules = baseConfig;
+      modules = [
+        ./modules/nixlet/nixlet-image.nix
+        ./modules/hardware/generic-pc.nix
+        (nixpkgs + "/nixos/modules/profiles/qemu-guest.nix")
+        {
+          nixpkgs.hostPlatform = "x86_64-linux";
+          nixlet.updates.enable = true;
+          nixlet.updates.updateUrl = "${updateUrl}";
+          system.image.version = releaseVersion;
+          system.image.id = "nixlet";
+          system.stateVersion = "24.05";
+        }
+      ];
     };
     nixosSystems.x86_64-linux.nixlet-insecure = nixpkgs.lib.nixosSystem {
-      modules = baseConfig ++ [ {
-        system.image.filesystems.encrypt = false;
-        system.image.id = nixpkgs.lib.mkOverride 0 "nixlet-insecure";
-      } ];
+      modules = [
+        ./modules/nixlet/nixlet-image.nix
+        ./modules/hardware/generic-pc.nix
+        (nixpkgs + "/nixos/modules/profiles/qemu-guest.nix")
+        {
+          nixpkgs.hostPlatform = "x86_64-linux";
+          nixlet.updates.enable = true;
+          nixlet.updates.updateUrl = "${updateUrl}";
+          system.image.version = releaseVersion;
+          nixlet.encrypt = false;
+          system.image.id = "nixlet-insecure";
+          system.stateVersion = "24.05";
+        }
+      ];
     };
     packages.x86_64-linux.nixlet = self.nixosSystems.x86_64-linux.nixlet.config.system.build.updatePackage;
     packages.x86_64-linux.nixlet-insecure = self.nixosSystems.x86_64-linux.nixlet-insecure.config.system.build.updatePackage;
