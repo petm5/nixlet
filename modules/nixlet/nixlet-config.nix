@@ -2,7 +2,6 @@
 
   imports = [
     ../../pkgs/default.nix
-    ../profiles/image-based.nix
     (modulesPath + "/profiles/minimal.nix")
     (modulesPath + "/profiles/perlless.nix")
   ];
