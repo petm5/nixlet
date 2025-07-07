@@ -2,6 +2,11 @@
     inherit (pkgs.stdenv.hostPlatform) efiArch;
     inherit (config.image.repart.verityStore) partitionIds;
     cfg = config.nixlet;
+    partitionSizes = {
+      esp = "96M";
+      store-verity = if cfg.compress then "64M" else "96M";
+      store = if cfg.compress then "512M" else "1G";
+    };
 in {
   imports = [
     (modulesPath + "/image/repart.nix")
@@ -93,13 +98,13 @@ in {
           repartConfig = {
             Type = "esp";
             Format = "vfat";
-            SizeMinBytes = "96M";
+            SizeMinBytes = partitionSizes.esp;
             SplitName = "-";
           };
         };
         ${partitionIds.store-verity}.repartConfig = {
-          SizeMinBytes = "64M";
-          SizeMaxBytes = "64M";
+          SizeMinBytes = partitionSizes.store-verity;
+          SizeMaxBytes = partitionSizes.store-verity;
           Label = "verity-${config.system.image.version}";
           SplitName = "verity";
           ReadOnly = 1;
@@ -119,30 +124,30 @@ in {
       "10-esp" = {
         Type = "esp";
         Format = "vfat";
-        SizeMinBytes = "96M";
-        SizeMaxBytes = "96M";
+        SizeMinBytes = partitionSizes.esp;
+        SizeMaxBytes = partitionSizes.esp;
       };
       "20-usr-verity-a" = {
         Type = "usr-verity";
-        SizeMinBytes = "64M";
-        SizeMaxBytes = "64M";
+        SizeMinBytes = partitionSizes.store-verity;
+        SizeMaxBytes = partitionSizes.store-verity;
       };
       "22-usr-a" = {
         Type = "usr";
-        SizeMinBytes = "512M";
-        SizeMaxBytes = "512M";
+        SizeMinBytes = partitionSizes.store;
+        SizeMaxBytes = partitionSizes.store;
       };
       "30-usr-verity-b" = {
         Type = "usr-verity";
-        SizeMinBytes = "64M";
-        SizeMaxBytes = "64M";
+        SizeMinBytes = partitionSizes.store-verity;
+        SizeMaxBytes = partitionSizes.store-verity;
         Label = "_empty";
         ReadOnly = 1;
       };
       "32-usr-b" = {
         Type = "usr";
-        SizeMinBytes = "512M";
-        SizeMaxBytes = "512M";
+        SizeMinBytes = partitionSizes.store;
+        SizeMaxBytes = partitionSizes.store;
         Label = "_empty";
         ReadOnly = 1;
       };

@@ -9,11 +9,6 @@
       enable = true;
       updateUrl = "http://server.test/";
     };
-    # The default usr-b is too small for uncompressed test images
-    systemd.repart.partitions."32-usr-b" = {
-      SizeMinBytes = lib.mkForce "1G";
-      SizeMaxBytes = lib.mkForce "1G";
-    };
   };
 
   updatePackage = test-common.makeUpdatePackage {
