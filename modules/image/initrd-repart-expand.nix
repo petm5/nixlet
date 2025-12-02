@@ -95,7 +95,7 @@ in {
       ''
         ${config.boot.initrd.systemd.package}/bin/systemd-repart \
                           --definitions=/etc/repart.d \
-                          --dry-run=no
+                          --dry-run=no \
                           --tpm2-pcrs=3,7,13
       ''
     ];
