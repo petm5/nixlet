@@ -12,7 +12,6 @@
     baseConfig = [
       (nixpkgs + "/nixos/modules/image/repart.nix")
       ./modules/image/repart-image-verity-store-defaults.nix
-      ./modules/image/repart-image-compress.nix
       ./modules/image/update-package.nix
       ./modules/image/initrd-repart-expand.nix
       ./modules/image/sysupdate-verity-store.nix
