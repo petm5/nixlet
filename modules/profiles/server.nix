@@ -67,4 +67,8 @@
     "systemd-firstboot.service"
   ];
 
+  services.logind.settings.Login = {
+    HandleLidSwitch = "ignore";
+  };
+
 }
