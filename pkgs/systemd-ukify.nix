@@ -17,7 +17,6 @@ super.systemd.override {
   withHostnamed = false;
   withHwdb = false;
   withImportd = false;
-  withIptables = false;
   withKmod = false;
   withLibBPF = false;
   withLibidn2 = false;

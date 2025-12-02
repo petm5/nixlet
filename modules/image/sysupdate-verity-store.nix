@@ -75,12 +75,6 @@
         };
       };
     };
-
-    systemd.additionalUpstreamSystemUnits = [
-      "systemd-bless-boot.service"
-      "boot-complete.target"
-    ];
-
   };
 
 }
