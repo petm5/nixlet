@@ -19,7 +19,6 @@
       ./modules/profiles/minimal.nix
       ./modules/profiles/image-based.nix
       ./modules/profiles/server.nix
-      ./modules/hardware/generic-pc.nix
       (nixpkgs + "/nixos/modules/profiles/qemu-guest.nix")
       {
         nixpkgs.hostPlatform = "x86_64-linux";
@@ -28,6 +27,10 @@
         system.image.id = "nixlet";
         system.image.version = releaseVersion;
         boot.kernelPackages = pkgs.linuxPackages_latest;
+        # Support USB drives, external HDDs
+        boot.initrd.availableKernelModules = [
+          "usb_storage" "uas"
+        ];
       }
     ];
   in {

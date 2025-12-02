@@ -1,9 +1,5 @@
 { config, lib, pkgs, modulesPath, ... }: {
 
-  imports = [
-    ./network.nix
-  ];
-
   # The server is accessed via ssh, passwords are unnecessary
   users.allowNoPasswordLogin = true;
 

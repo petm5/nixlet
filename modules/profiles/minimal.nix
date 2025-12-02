@@ -12,16 +12,6 @@
     composefs = self.callPackage ../../pkgs/composefs.nix { inherit super; };
   })];
 
-  # Don't include kernel or modules in rootfs
-  boot.kernel.enable = false;
-  boot.modprobeConfig.enable = false;
-  boot.bootspec.enable = false;
-  system.build = { inherit (config.boot.kernelPackages) kernel; };
-  system.modulesTree = [ config.boot.kernelPackages.kernel ] ++ config.boot.extraModulePackages;
-
-  # Modules must be loaded by initrd
-  boot.initrd.kernelModules = config.boot.kernelModules;
-
   boot.kernelModules = [
     # Required for systemd SMBIOS credential import
     "dmi_sysfs"
@@ -31,6 +21,19 @@
   i18n.supportedLocales = [
     "en_US.UTF-8/UTF-8"
   ];
+
+  # Use TCP BBR
+  boot.kernel.sysctl = {
+    "net.core.default_qdisc" = "fq";
+    "net.ipv4.tcp_congestion_control" = "bbr";
+  };
+
+  # Use nftables
+  networking.nftables.enable = true;
+
+  # Use systemd-networkd
+  networking.useNetworkd = true;
+  systemd.network.wait-online.enable = true;
 
   programs.nano.enable = false;
 
