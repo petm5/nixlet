@@ -34,7 +34,7 @@
           Path = "/EFI/Linux";
           PathRelativeTo = "esp";
           MatchPattern = "${config.boot.uki.name}_@v+@l-@d.efi ${config.boot.uki.name}_@v+@l.efi ${config.boot.uki.name}_@v.efi";
-          Mode = "0444";
+          Mode = "0644";
           TriesLeft = 3;
           TriesDone = 0;
           InstancesMax = 2;
@@ -75,12 +75,6 @@
         };
       };
     };
-
-    systemd.additionalUpstreamSystemUnits = [
-      "systemd-bless-boot.service"
-      "boot-complete.target"
-    ];
-
   };
 
 }

@@ -12,14 +12,12 @@
     baseConfig = [
       (nixpkgs + "/nixos/modules/image/repart.nix")
       ./modules/image/repart-image-verity-store-defaults.nix
-      ./modules/image/repart-image-compress.nix
       ./modules/image/update-package.nix
       ./modules/image/initrd-repart-expand.nix
       ./modules/image/sysupdate-verity-store.nix
       ./modules/profiles/minimal.nix
       ./modules/profiles/image-based.nix
       ./modules/profiles/server.nix
-      ./modules/hardware/generic-pc.nix
       (nixpkgs + "/nixos/modules/profiles/qemu-guest.nix")
       {
         nixpkgs.hostPlatform = "x86_64-linux";
@@ -28,6 +26,10 @@
         system.image.id = "nixlet";
         system.image.version = releaseVersion;
         boot.kernelPackages = pkgs.linuxPackages_latest;
+        # Support USB drives, external HDDs
+        boot.initrd.availableKernelModules = [
+          "usb_storage" "uas"
+        ];
       }
     ];
   in {

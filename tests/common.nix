@@ -36,6 +36,7 @@ in rec {
         ];
         # Use weak compression
         image.repart.compression.enable = false;
+        image.repart.mkfsOptions.erofs = lib.mkOverride 1 [ "-zlz4" "-C1048576" "-Efragments,ztailpacking" ];
         boot.initrd.compressor = "zstd";
         boot.initrd.compressorArgs = [ "-2" ];
       }
