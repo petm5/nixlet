@@ -84,11 +84,6 @@ in {
     boot.initrd.luks.forceLuksSupportInInitrd = true;
     boot.initrd.kernelModules = [ "dm_mod" "dm_crypt" ] ++ config.boot.initrd.luks.cryptoModules;
 
-    # BUG: mkfs.btrfs hangs when trying to discard an encrypted partition.
-    boot.initrd.systemd.services.systemd-repart.serviceConfig.Environment = [
-      "SYSTEMD_REPART_MKFS_OPTIONS_BTRFS=--nodiscard"
-    ];
-
     # Measure UEFI settings (PCR 3), Secure Boot policy (PCR 7), system extensions (PCR 13)
     boot.initrd.systemd.services.systemd-repart.serviceConfig.ExecStart = lib.mkForce [
       " "
