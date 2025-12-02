@@ -5,13 +5,6 @@
     (modulesPath + "/profiles/perlless.nix")
   ];
 
-  # Overlays to reduce build time and closure size
-  nixpkgs.overlays = [(self: super: {
-    systemdUkify = self.callPackage ../../pkgs/systemd-ukify.nix { inherit super; };
-    qemu_tiny = self.callPackage ../../pkgs/qemu.nix { inherit super; };
-    composefs = self.callPackage ../../pkgs/composefs.nix { inherit super; };
-  })];
-
   boot.kernelModules = [
     # Required for systemd SMBIOS credential import
     "dmi_sysfs"
