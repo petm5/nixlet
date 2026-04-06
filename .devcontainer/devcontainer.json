@@ -16,6 +16,6 @@
       "version": "latest"
     }
   },
-  "onCreateCommand": "echo 'nix develop' >> ~/.bashrc",
+  "onCreateCommand": "echo 'if [ -z \"$IN_NIX_SHELL\" ]; then nix develop; fi' >> ~/.bashrc",
   "postCreateCommand": "nix develop -c echo 'Nix shell warmed up'"
 }
