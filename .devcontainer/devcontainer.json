@@ -17,5 +17,16 @@
     },
     "ghcr.io/devcontainers-community/features/direnv": {}
   },
-  "postCreateCommand": "direnv allow ."
+  "postCreateCommand": "direnv allow .",
+  "customizations": {
+    "codespaces": {
+      "repositories": {
+        "petm5/nixpkgs": {
+          "permissions": {
+            "issues": "write"
+          }
+        }
+      }
+    }
+  }
 }
