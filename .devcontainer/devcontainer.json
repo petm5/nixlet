@@ -13,5 +13,5 @@
       "extraNixConfig": "experimental-features = nix-command flakes"
     }
   },
-  "onCreateCommand": "nix develop"
+  "postAttachCommand": "nix develop"
 }
