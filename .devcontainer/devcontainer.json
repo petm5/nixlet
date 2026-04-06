@@ -1,6 +1,6 @@
 {
   "name": "Nix Dev Shell",
-  "image": "ghcr.io/devcontainers/templates/alpine:3.4.0",
+  "image": "ghcr.io/devcontainers/templates/debian:4.0.0",
   "customizations": {
     "vscode": {
       "extensions": [
