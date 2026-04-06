@@ -14,8 +14,8 @@
     },
     "ghcr.io/devcontainers/features/sshd:1": {
       "version": "latest"
-    }
+    },
+    "ghcr.io/devcontainers-contrib/features/direnv:1": {}
   },
-  "onCreateCommand": "echo '[ -v IN_NIX_SHELL ] || nix develop' >> ~/.bashrc",
-  "postCreateCommand": "nix develop -c echo 'Nix shell warmed up'"
+  "postCreateCommand": "direnv allow ."
 }
