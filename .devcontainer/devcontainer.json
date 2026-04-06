@@ -16,5 +16,6 @@
       "version": "latest"
     }
   },
-  "postAttachCommand": "nix develop"
+  "onCreateCommand": "echo 'nix develop' >> ~/.bashrc",
+  "postCreateCommand": "nix develop -c echo 'Nix shell warmed up'"
 }
