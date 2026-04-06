@@ -23,7 +23,7 @@
       "repositories": {
         "petm5/nixpkgs": {
           "permissions": {
-            "issues": "write"
+            "contents": "write"
           }
         }
       }
