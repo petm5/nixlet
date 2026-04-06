@@ -1,6 +1,6 @@
 {
   "name": "Nix Dev Shell",
-  "image": "ghcr.io/devcontainers/templates/debian:4.0.0",
+  "image": "mcr.microsoft.com/devcontainers/base:trixie",
   "customizations": {
     "vscode": {
       "extensions": [
