@@ -14,10 +14,8 @@
     },
     "ghcr.io/devcontainers/features/sshd:1": {
       "version": "latest"
-    },
-    "ghcr.io/devcontainers-community/features/direnv": {}
+    }
   },
-  "postCreateCommand": "direnv allow .",
   "customizations": {
     "codespaces": {
       "repositories": {
