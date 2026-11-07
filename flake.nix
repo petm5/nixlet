@@ -26,6 +26,7 @@
         system.image.id = "nixlet";
         system.image.version = releaseVersion;
         boot.kernelPackages = pkgs.linuxPackages_latest;
+        image.repart.mkfsOptions.erofs = [ "-zlz4hc,12" "-C1048576" "-Eall-fragments,ztailpacking,fragdedupe=full" ];
         # Support USB drives, external HDDs
         boot.initrd.availableKernelModules = [
           "usb_storage" "uas"
