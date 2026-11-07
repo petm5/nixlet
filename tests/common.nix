@@ -30,14 +30,6 @@ in rec {
         system.image.id = lib.mkDefault "nixos-appliance";
         system.image.version = lib.mkDefault "1";
         networking.hosts."10.0.2.1" = [ "server.test" ];
-        boot.kernelParams = [
-          "x-systemd.device-timeout=10s"
-          "console=ttyS0,115200n8"
-        ];
-        # Use weak compression
-        image.repart.compression.enable = false;
-        boot.initrd.compressor = "zstd";
-        boot.initrd.compressorArgs = [ "-2" ];
       }
       (pkgs.path + "/nixos/modules/testing/test-instrumentation.nix")
       extraConfig
