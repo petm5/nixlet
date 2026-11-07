@@ -10,10 +10,6 @@ in {
 
   config = lib.mkMerge [({
 
-    assertions = [
-      { assertion = config.boot.initrd.systemd.enable; }
-    ];
-
     boot.initrd.systemd.repart.enable = true;
     systemd.repart.partitions = {
       "10-esp" = {

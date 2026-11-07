@@ -5,7 +5,7 @@ with import (pkgs.path + "/nixos/lib/testing-python.nix") { inherit pkgs; inheri
 let
 
   nixos-lib = import (pkgs.path + "/nixos/lib") {};
-  qemu-common = import (pkgs.path + "/nixos/lib/qemu-common.nix") { inherit lib pkgs; };
+  qemu-common = import (pkgs.path + "/nixos/lib/qemu-common.nix") { inherit (pkgs) lib stdenv; };
 
 in rec {
 
@@ -55,6 +55,7 @@ in rec {
 
   makeImageTest = { name, image, script, httpRoot ? null, sshAuthorizedKey ? null }: let
     qemu = qemu-common.qemuBinary pkgs.qemu_test;
+    qemu-img = "${pkgs.qemu_test}/bin/qemu-img";
     flags = [
       "-machine" "type=q35,accel=kvm,smm=on"
       "-m" "512M"
@@ -83,7 +84,7 @@ in rec {
 
       subprocess.check_call(
           [
-              "qemu-img",
+              "${qemu-img}",
               "create",
               "-f",
               "qcow2",
@@ -94,7 +95,7 @@ in rec {
               "${mutableImage}",
           ]
       )
-      subprocess.check_call(["qemu-img", "resize", "${mutableImage}", "4G"])
+      subprocess.check_call(["${qemu-img}", "resize", "${mutableImage}", "4G"])
 
       os.mkdir("${tpmFolder}")
       os.mkdir("${tpmFolder}/swtpm")

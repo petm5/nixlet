@@ -3,18 +3,11 @@ let
   inherit (pkgs.stdenv.hostPlatform) efiArch;
   inherit (config.image.repart.verityStore) partitionIds;
 in {
-  assertions = [
-    { assertion = config.boot.initrd.systemd.enable; }
-  ];
-
-  fileSystems."/nix/store" = {
-    device = "/usr/nix/store";
-    options = [ "bind" ];
-  };
-
   boot.kernelParams = [ "mount.usrfstype=erofs" "mount.usrflags=ro" ];
 
   image.repart = {
+    enable = true;
+
     verityStore.enable = true;
 
     partitions = {
@@ -43,6 +36,7 @@ in {
         Label = "usr-${config.system.image.version}";
         SplitName = "usr";
         ReadOnly = 1;
+        FileSystemSectorSize = 4096;
       };
     };
 
