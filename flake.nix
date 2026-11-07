@@ -26,6 +26,7 @@
         system.image.id = "nixlet";
         system.image.version = releaseVersion;
         boot.kernelPackages = pkgs.linuxPackages_latest;
+        image.repart.mkfsOptions.erofs = [ "-zlz4hc,12" "-C1048576" "-Eall-fragments,ztailpacking,fragdedupe=full" ];
         # Support USB drives, external HDDs
         boot.initrd.availableKernelModules = [
           "usb_storage" "uas"
@@ -33,23 +34,26 @@
       }
     ];
   in {
-    nixosSystems.x86_64-linux.nixlet = nixpkgs.lib.nixosSystem {
-      modules = baseConfig;
+    nixosConfigurations = {
+      nixlet = nixpkgs.lib.nixosSystem {
+        modules = baseConfig;
+      };
+      nixlet-insecure = nixpkgs.lib.nixosSystem {
+        modules = baseConfig ++ [ {
+          system.image.filesystems.encrypt = false;
+          system.image.id = nixpkgs.lib.mkOverride 0 "nixlet-insecure";
+        } ];
+      };
     };
-    nixosSystems.x86_64-linux.nixlet-insecure = nixpkgs.lib.nixosSystem {
-      modules = baseConfig ++ [ {
-        system.image.filesystems.encrypt = false;
-        system.image.id = nixpkgs.lib.mkOverride 0 "nixlet-insecure";
-      } ];
-    };
-    packages.x86_64-linux.nixlet = self.nixosSystems.x86_64-linux.nixlet.config.system.build.updatePackage;
-    packages.x86_64-linux.nixlet-insecure = self.nixosSystems.x86_64-linux.nixlet-insecure.config.system.build.updatePackage;
+    packages.x86_64-linux = builtins.mapAttrs
+      (name: configuration: configuration.config.system.build.updatePackage)
+      self.nixosConfigurations;
     checks.x86_64-linux = nixpkgs.lib.listToAttrs (map (test: nixpkgs.lib.nameValuePair "${test}" (import ./tests/${test}.nix {
       pkgs = nixpkgs.legacyPackages."x86_64-linux";
       inherit self;
     })) [ "integration" "system-update" ]);
     apps.x86_64-linux.nixlet-live-test = let
-      testSystem = self.nixosSystems.x86_64-linux.nixlet-insecure;
+      testSystem = self.nixosConfigurations.nixlet-insecure;
       script = (import ./tests/common.nix rec {
         inherit self;
         pkgs = nixpkgs.legacyPackages."x86_64-linux";

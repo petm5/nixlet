@@ -7,9 +7,15 @@
     system.image.version = "1";
     system.image.updates.url = "http://server.test/";
     # The default usr-b is too small for uncompressed test images
-    systemd.repart.partitions."32-usr-b" = {
-      SizeMinBytes = lib.mkForce "1G";
-      SizeMaxBytes = lib.mkForce "1G";
+    systemd.repart.partitions = {
+      "30-usr-verity-b" = {
+        SizeMinBytes = lib.mkForce "96M";
+        SizeMaxBytes = lib.mkForce "96M";
+      };
+      "32-usr-b" = {
+        SizeMinBytes = lib.mkForce "1G";
+        SizeMaxBytes = lib.mkForce "1G";
+      };
     };
   };
 
@@ -23,23 +29,19 @@ in test-common.makeImageTest {
   image = initialImage;
   httpRoot = updatePackage;
   script = ''
-    start_tpm()
-    machine.start()
-
-    machine.systemctl("start network-online.target")
-    machine.wait_for_unit("network-online.target")
-
-    machine.succeed("/run/current-system/sw/lib/systemd/systemd-sysupdate update")
-
-    machine.shutdown()
-
-    start_tpm()
-    machine.start()
+    machine.start(allow_reboot=True)
 
     machine.wait_for_unit("multi-user.target")
 
-    machine.succeed('. /etc/os-release; [ "$IMAGE_VERSION" == "2" ]')
+    with subtest("Install system update & reboot"):
+      machine.systemctl("start network-online.target")
+      machine.wait_for_unit("network-online.target")
+      machine.succeed("/run/current-system/sw/lib/systemd/systemd-sysupdate update")
+      machine.reboot()
 
-    machine.wait_for_unit("systemd-bless-boot.service")
+    with subtest("Verify update success"):
+      machine.wait_for_unit("multi-user.target")
+      machine.succeed('. /etc/os-release; [ "$IMAGE_VERSION" == "2" ]')
+      machine.wait_for_unit("systemd-bless-boot.service")
   '';
 }
