@@ -1,10 +1,7 @@
-{ self, lib, pkgs, ... }:
-
-with import (pkgs.path + "/nixos/lib/testing-python.nix") { inherit pkgs; inherit (pkgs.hostPlatform) system; };
+{ lib, pkgs, ... }:
 
 let
 
-  nixos-lib = import (pkgs.path + "/nixos/lib") {};
   qemu-common = import (pkgs.path + "/nixos/lib/qemu-common.nix") { inherit (pkgs) lib stdenv; };
 
 in rec {
@@ -44,72 +41,63 @@ in rec {
     system = makeSystem extraConfig;
   in "${system.config.system.build.updatePackage}";
 
-  makeImageTest = { name, image, script, httpRoot ? null, sshAuthorizedKey ? null }: let
-    qemu = qemu-common.qemuBinary pkgs.qemu_test;
-    qemu-img = "${pkgs.qemu_test}/bin/qemu-img";
-    flags = [
-      "-machine" "type=q35,accel=kvm,smm=on"
-      "-m" "512M"
-      "-drive" "if=pflash,format=raw,unit=0,readonly=on,file=${pkgs.OVMF.firmware}"
-      "-drive" "if=pflash,format=raw,unit=1,readonly=on,file=${pkgs.OVMF.variables}"
-      "-drive" "if=virtio,file=${mutableImage}"
-      "-chardev" "socket,id=chrtpm,path=${tpmFolder}/swtpm-sock"
-      "-tpmdev" "emulator,id=tpm0,chardev=chrtpm"
-      "-device" "tpm-tis,tpmdev=tpm0"
-      "-netdev" ("'user,id=net0" + (lib.optionalString (httpRoot != null) ",guestfwd=tcp:10.0.2.1:80-cmd:${pkgs.micro-httpd}/bin/micro_httpd ${httpRoot}") + "'")
-      "-device" "virtio-net-pci,netdev=net0"
-    ] ++ (lib.optionals (sshAuthorizedKey != null) [
-      "-smbios" ("'type=11,value=io.systemd.credential:ssh.authorized_keys.root=" + sshAuthorizedKey + "'")
-    ]);
-    flagsStr = lib.concatStringsSep " " flags;
-    startCommand = "${qemu} ${flagsStr}";
-    mutableImage = "/tmp/linked-image.qcow2";
-    tpmFolder = "/tmp/emulated_tpm";
-    indentLines = str: lib.concatLines (map (s: "  " + s) (lib.splitString "\n" str));
-  in makeTest {
+  makeImageTest = { name, image, script, httpRoot ? null, sshAuthorizedKey ? null }:
+  pkgs.testers.runNixOSTest ( { config, lib, ... }: {
     inherit name;
-    nodes = { };
-    testScript = ''
-      import os
-      import subprocess
+    nodes.machine = { config, lib, ... }:
+      let
+        cfg = config.virtualisation;
+        qemu = cfg.qemu.package;
+        qemu-img = lib.getExe' qemu "qemu-img";
+        mkDiskImage = pkgs.writeShellScript "mutable-disk.img" ''
+          NIX_DISK_IMAGE=$(readlink -f "./${config.system.name}.qcow2")
 
-      subprocess.check_call(
-          [
-              "${qemu-img}",
-              "create",
-              "-f",
-              "qcow2",
-              "-F",
-              "raw",
-              "-b",
-              "${image}",
-              "${mutableImage}",
-          ]
-      )
-      subprocess.check_call(["${qemu-img}", "resize", "${mutableImage}", "4G"])
+          ${qemu-img} create \
+            -f qcow2 \
+            -b ${image} \
+            -F raw \
+            "$NIX_DISK_IMAGE" \
+            "${toString cfg.diskSize}M" \
+            >&2
 
-      os.mkdir("${tpmFolder}")
-      os.mkdir("${tpmFolder}/swtpm")
+          echo "$NIX_DISK_IMAGE"
+        '';
+      in {
+        nix.enable = false;
 
-      def start_tpm():
-        subprocess.Popen(
-            [
-                "${pkgs.swtpm}/bin/swtpm",
-                "socket",
-                "--tpmstate", "dir=${tpmFolder}/swtpm",
-                "--ctrl", "type=unixio,path=${tpmFolder}/swtpm-sock",
-                "--tpm2"
-            ]
-        )
+        virtualisation.cores = 1;
+        virtualisation.memorySize = 512;
+        virtualisation.diskSize = 4096;
 
-      machine = create_machine("${startCommand}")
+        virtualisation.useBootLoader = true;
+        virtualisation.useEFIBoot = true;
 
-      try:
-    '' + indentLines script + ''
-      finally:
-        machine.shutdown()
-    '';
-  };
+        virtualisation.tpm.enable = true;
+
+        virtualisation.credentials = lib.mkIf (sshAuthorizedKey != null) {
+          "ssh.authorized_keys.root".text = sshAuthorizedKey;
+        };
+
+        virtualisation.useDefaultFilesystems = false;
+        virtualisation.efi.keepVariables = false;
+        boot.initrd.enable = false;
+        system.build.initialRamdisk = "";
+        virtualisation.diskImage = null;
+
+        virtualisation.qemu.networkingOptions = lib.mkIf (httpRoot != null) (lib.mkOverride 10 [
+          "-net nic,netdev=user.0,model=virtio"
+          "-netdev" "'user,id=user.0,guestfwd=tcp:10.0.2.1:80-cmd:${pkgs.micro-httpd}/bin/micro_httpd ${httpRoot}'"
+        ]);
+
+        virtualisation.qemu.drives = [
+          {
+            name = "disk";
+            file = "$(${mkDiskImage})";
+          }
+        ];
+      };
+    testScript = script;
+  } );
 
   makeInteractiveTest = { image, qemu ? pkgs.qemu_kvm, OVMF ? pkgs.OVMF, runtimeShell ? pkgs.runtimeShell }: let
     qemuCommand = qemu-common.qemuBinary qemu;
